@@ -1,0 +1,17 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Conteúdo da pasta scripts (scripts pessoais do usuário)
+scripts/*
+!scripts/.gitkeep
+
+# Configuração local
+config.json

@@ -167,8 +167,7 @@ Use a CLI `fort` para editar a configuração de forma interativa, ou edite o ar
 
 ## 📄 Licença
 
-Este projeto é de uso pessoal.
-
+MIT
 ---
 
 Feito com ❤️ para quem precisa de automação inteligente e gerenciamento eficiente de recursos.

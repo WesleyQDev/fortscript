@@ -1,23 +1,5 @@
 [project]
 name = "fortscript"
-<<<<<<< HEAD
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "prompt-toolkit>=3.0.52",
-    "psutil>=7.1.3",
-    "rich>=14.2.0",
-    "typer>=0.20.0",
-]
-
-[project.scripts]
-fort = "cli:app"
-
-[tool.setuptools]
-py-modules = ["cli", "main"]
-=======
 version = "0.2.0"
 description = "Ferramenta para automação e controle de processos, otimizada para economizar memória e processamento do sistema."
 readme = "README.md"
@@ -30,4 +12,3 @@ dependencies = [
 
 [project.scripts]
 fort = "cli.cli:main"
->>>>>>> v02

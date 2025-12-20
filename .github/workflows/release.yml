@@ -11,7 +11,7 @@ on:
 env:
   PACKAGE_NAME: "fortscript"
   OWNER: "WesleyQDev"
-  TAP_NAME: "homebrew-fortscript"
+
   PYTHON_VERSION: "3.12"
 
 jobs:
@@ -117,20 +117,3 @@ jobs:
             --title "${{ needs.details.outputs.tag_name }}" \
             --generate-notes
 
-  update_homebrew:
-    needs: [build_and_publish, details]
-    runs-on: ubuntu-latest
-    if: success()
-    steps:
-      - name: Dispatch Homebrew Update
-        uses: peter-evans/repository-dispatch@v3
-        with:
-          token: ${{ secrets.BREW_TAP_TOKEN }}
-          repository: ${{ env.OWNER }}/${{ env.TAP_NAME }}
-          event-type: "update-formula"
-          client-payload: |-
-            { 
-              "formula_version": "${{ needs.details.outputs.new_version }}", 
-              "formula_name": "${{ env.PACKAGE_NAME }}",
-              "formula_url": "https://github.com/${{ env.OWNER }}/${{ env.PACKAGE_NAME }}/releases/download/${{ needs.details.outputs.tag_name }}/${{ env.PACKAGE_NAME }}-${{ needs.details.outputs.new_version }}.tar.gz"
-            }

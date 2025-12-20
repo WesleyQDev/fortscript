@@ -2,7 +2,19 @@
 
 Um supervisor de processos com controle de execução baseado no estado dos recursos do sistema.
 
-[English](README.md) | [Português](README_PT-BR.md)
+[English](README.md) | [Português](README_ptBR.md)
+
+## Sumário
+- [1. A Biblioteca](#1-a-biblioteca)
+    - [Instalação](#instalação)
+    - [Início Rápido](#início-rápido)
+    - [Por que usar a biblioteca?](#por-que-usar-a-biblioteca)
+    - [Exemplos de Uso](#exemplos-de-uso)
+    - [Opções de Configuração](#opções-de-configuração)
+- [2. CLI](#2-cli)
+- [Roadmap & Funcionalidades](#roadmap--funcionalidades)
+- [Contribuição](#contribuição)
+- [Licença](#licença)
 
 **FortScript** é um Process Manager em Python, baseado em monitoramento de RAM e detecção de processos do sistema operacional, que inicia, pausa e encerra aplicações automaticamente usando políticas reativas de consumo de recursos.
 
@@ -11,6 +23,11 @@ Um supervisor de processos com controle de execução baseado no estado dos recu
 ## 1. A Biblioteca
 
 O FortScript pode ser integrado em qualquer projeto Python como uma biblioteca para gerenciar processos filhos e monitorar a saúde do sistema.
+
+### Instalação
+```bash
+pip install fortscript
+```
 
 ### Início Rápido
 ```python
@@ -28,18 +45,27 @@ app.run()
 -   **Monitoramento de Recursos**: Hooks integrados para uso de RAM e atividade de processos.
 -   **Multi-Runtime**: Suporta Python, Node.js (pnpm) e Executáveis nativos.
 
-### Exemplos de Uso
-
 #### 1. Gerenciando Módulos Independentes
 Você pode usar o FortScript como um controlador central para vários scripts espalhados pelo seu sistema.
 
 **config.yaml**:
 ```yaml
+# Lista de projetos a serem gerenciados
 projects:
   - name: "Bot de Trade"
     path: "C:/Users/Dev/Finance/bot.py"
   - name: "Monitor de Servidor"
     path: "C:/Users/Dev/Server/monitor.js"
+
+# Processos que, quando detectados, pausarão seus projetos
+heavy_processes:
+  - name: "Fortnite"
+    process: "fortnite"
+  - name: "Editor de Vídeo"
+    process: "resolve"
+
+# Limite de porcentagem de uso de RAM para acionar o desligamento seguro
+ram_threshold: 90
 ```
 
 #### 2. Integração em projetos maiores
@@ -55,21 +81,34 @@ def iniciar_servicos():
     gerenciador.run()
 ```
 
+### Opções de Configuração
+
+O arquivo `config.yaml` suporta os seguintes campos:
+
+| Campo | Descrição | Tipo | Padrão |
+| :--- | :--- | :--- | :--- |
+| `projects` | Lista de aplicações para gerenciar. Cada item precisa de `name` e `path`. | Lista | `[]` |
+| `heavy_processes` | Lista de processos que ativam a pausa. Cada item precisa de `name` e `process` (parte do nome do executável). | Lista | `[]` |
+| `ram_threshold` | Porcentagem máxima de uso de RAM permitida antes de parar os scripts. | Inteiro | `80` |
+
 ---
 
 ## 2. CLI
 
 A CLI é uma interface projetada para um público amplo, permitindo o gerenciamento fácil de processos.
 
-> **Nota:** A CLI está atualmente em desenvolvimento. Em breve estará disponível diretamente via `pip`.
-
-- **Configuração**: Os paths dos arquivos de inicialização dos seus scripts ficam localizados em `cli/config.yaml`.
-- **Futuro**: Em breve, será possível adicionar o script principal de inicialização à CLI executando apenas um comando dentro da pasta do projeto.
-
 ### Uso
+Se você estiver desenvolvendo localmente:
 ```bash
-uv run cli/cli.py
+uv run fort
 ```
+Após a instalação, basta executar:
+```bash
+fort
+```
+
+- **Configuração**: A CLI procura por um arquivo `config.yaml` no mesmo diretório do script.
+- **Auto-detecção**: Em breve, será possível adicionar o script principal de inicialização à CLI executando apenas um comando dentro da pasta do projeto.
 
 ---
 
@@ -80,9 +119,9 @@ A lista a seguir acompanha o progresso de nossas funcionalidades e futuras imple
 - [x] **Monitorar Processos Pesados**: Detecção de aplicativos que consomem muitos recursos.
 - [x] **Monitorar Uso de Memória RAM**: Gatilhos automáticos baseados na porcentagem de memória.
 - [x] **Executor de Scripts Unificado**:
-    - [x] Executáveis nativos (`.exe`)
+    - [ ] Executáveis nativos (`.exe`)
     - [x] Scripts Python (`.py`)
-    - [x] Projetos JavaScript/TypeScript (`package.json`)
+    - [ ] Projetos JavaScript/TypeScript (`package.json`)
 - [ ] **Integração com o Sistema**:
     - [ ] Iniciar automaticamente com o Windows/Linux.
     - [ ] Suporte a System Tray (ícone na barra de tarefas) para operação em segundo plano.

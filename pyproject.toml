@@ -1,21 +1,34 @@
 [project]
 name = "fortscript"
 version = "0.2.0"
-description = "Ferramenta para automação e controle de processos, otimizada para economizar memória e processamento do sistema."
+authors = [
+  { name="Wesley Queiroz" },
+]
+description = "A process supervisor with execution control based on system resource state."
 readme = "README.md"
 requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
 dependencies = [
     "psutil>=7.1.3",
     "pyyaml>=6.0.3",
     "rich>=14.2.0",
 ]
 
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
 [project.scripts]
 fort = "fortscript.cli.cli:main"
 
-[tool.setuptools]
-packages = ["fortscript"]
-include-package-data = true
+[project.urls]
+Repository = "https://github.com/WesleyQDev/fortscript"
 
-[tool.setuptools.package-data]
-"fortscript.cli" = ["*.yaml"]
+
+
+[build-system]
+requires = ["uv_build >= 0.9.17, <0.10.0"]
+build-backend = "uv_build"

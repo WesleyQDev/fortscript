@@ -4,27 +4,24 @@ Um supervisor de processos com controle de execução baseado no estado dos recu
 
 [English](README.md) | [Português](README_ptBR.md)
 
-## Sumário
-- [1. A Biblioteca](#1-a-biblioteca)
-    - [Instalação](#instalação)
-    - [Início Rápido](#início-rápido)
-    - [Por que usar a biblioteca?](#por-que-usar-a-biblioteca)
-    - [Exemplos de Uso](#exemplos-de-uso)
-    - [Opções de Configuração](#opções-de-configuração)
-- [2. CLI](#2-cli)
-- [Roadmap & Funcionalidades](#roadmap--funcionalidades)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
 
-**FortScript** é um Process Manager em Python, baseado em monitoramento de RAM e detecção de processos do sistema operacional, que inicia, pausa e encerra aplicações automaticamente usando políticas reativas de consumo de recursos.
+## 1. Biblioteca Python
 
----
+O FortScript pode ser integrado em qualquer projeto Python como uma biblioteca para gerenciar scripts filhos.
 
-## 1. A Biblioteca
+Você pode usar o FortScript para iniciar scripts e parar quando determinada quantidade de memória RAM for usada. Ou quando determinado aplicativo/processo for inicializado.
 
-O FortScript pode ser integrado em qualquer projeto Python como uma biblioteca para gerenciar processos filhos e monitorar a saúde do sistema.
+Um caso de uso por exemplo seria utilizar a biblioteca para uma criação de um Modo gaming, onde dentro do seu projeto você consegue definir scripts que serão pausados quando determinados jogos forem iniciados e retomados quando os jogos forem fechados.
 
 ### Instalação
+O FortScript foi desenvolvido utilizando UV. Recomendamos o uso do UV para instalar a biblioteca.
+
+```bash
+uv add fortscript
+```
+
+Se você estiver usando o Python padrão, você pode instalar a biblioteca do FortScript com o pip.
+
 ```bash
 pip install fortscript
 ```

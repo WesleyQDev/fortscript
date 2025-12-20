@@ -1,29 +1,27 @@
 # FortScript
+
 A process supervisor with execution control based on system resource state.
 
 [English](README.md) | [Português](README_ptBR.md)
 
-## Table of Contents
-- [1. The Library](#1-the-library)
-    - [Installation](#installation)
-    - [Quick Start](#quick-start)
-    - [Why use the library?](#why-use-the-library)
-    - [Usage Examples](#usage-examples)
-    - [Configuration Options](#configuration-options)
-- [2. CLI](#2-cli)
-- [Roadmap & Features](#roadmap--features)
-- [Contributing](#contributing)
-- [License](#license)
 
-**FortScript** is a Python Process Manager, based on RAM monitoring and OS process detection, that automatically starts, pauses, and terminates applications using reactive resource consumption policies.
+## 1. Python Library
 
----
+FortScript can be integrated into any Python project as a library to manage child scripts.
 
-## 1. The Library
+You can use FortScript to start scripts and stop them when a certain amount of RAM is used. Or when a specific application/process is started.
 
-FortScript can be integrated into any Python project as a library to manage child processes and monitor system health.
+A use case, for example, would be to use the library to create a Gaming Mode, where within your project you can define scripts that will be paused when specific games are started and resumed when the games are closed.
 
 ### Installation
+FortScript was developed using UV. We recommend using UV to install the library.
+
+```bash
+uv add fortscript
+```
+
+If you are using standard Python, you can install the FortScript library with pip.
+
 ```bash
 pip install fortscript
 ```
@@ -42,7 +40,7 @@ app.run()
 ### Why use the library?
 -   **Clean Lifecycle**: Safely start and stop child processes (including full process trees).
 -   **Resource Monitoring**: Built-in hooks for RAM usage and process activity.
--   **Multi-Runtime**: Supports Python, Node.js (pnpm), and native Executables.
+-   **Multi-Runtime**: Supports Python, Node.js (pnpm) and Native Executables.
 
 #### 1. Managing Independent Modules
 You can use FortScript as a central controller for various scripts scattered across your system.
@@ -67,7 +65,7 @@ heavy_processes:
 ram_threshold: 90
 ```
 
-#### 2. Integration in Larger Projects
+#### 2. Integration in larger projects
 Import `FortScript` in your main application entry point to automatically handle background tasks.
 
 ```python
@@ -87,7 +85,7 @@ The `config.yaml` file supports the following fields:
 | Field | Description | Type | Default |
 | :--- | :--- | :--- | :--- |
 | `projects` | List of applications to manage. Each item needs a `name` and `path`. | List | `[]` |
-| `heavy_processes` | List of processes that trigger a pause. Each item needs a `name` and `process` (substring of the executable name). | List | `[]` |
+| `heavy_processes` | List of processes that trigger a pause. Each item needs a `name` and `process` (part of the executable name). | List | `[]` |
 | `ram_threshold` | Maximum RAM usage percentage allowed before stopping scripts. | Integer | `80` |
 
 ---
@@ -115,19 +113,19 @@ fort
 
 The following list tracks the progress of our features and future implementations:
 
-- [x] **Monitor Heavy Processes**: Detection of resource-intensive applications.
-- [x] **RAM Usage Monitoring**: Automatic triggers based on memory percentage.
-- [x] **Unified Script Runner**:
+- [x] **Monitor Heavy Processes**: Detection of applications that consume many resources.
+- [x] **Monitor RAM Usage**: Automatic triggers based on memory percentage.
+- [x] **Unified Script Executor**:
     - [ ] Native Executables (`.exe`)
-    - [X] Python Scripts (`.py`)
+    - [x] Python Scripts (`.py`)
     - [ ] JavaScript/TypeScript Projects (`package.json`)
 - [ ] **System Integration**:
     - [ ] Auto-start with Windows/Linux.
-    - [ ] System Tray (Icon) support for background operation.
+    - [ ] System Tray (icon in the taskbar) for background operation.
 - [x] **Smart Interruption**:
-    - [x] Auto-stop when heavy processes are detected.
-    - [x] Auto-resume when processes are closed.
-    - [x] RAM-based stop/resume cycling.
+    - [x] Automatic stop when heavy processes are detected.
+    - [x] Automatic resume when processes are closed.
+    - [x] Stop/resume cycle based on RAM.
 
 ---
 

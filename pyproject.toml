@@ -11,4 +11,11 @@ dependencies = [
 ]
 
 [project.scripts]
-fort = "cli.cli:main"
+fort = "fortscript.cli.cli:main"
+
+[tool.setuptools]
+packages = ["fortscript"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"fortscript.cli" = ["*.yaml"]

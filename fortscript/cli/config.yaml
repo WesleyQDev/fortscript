@@ -1,0 +1,9 @@
+projects:
+  # - name: ProjectA
+  #   path: C:\Users\dev\project\main.py
+
+heavy_processes:
+  # - name: Fortnite
+  #   process: fortnite
+
+ram_threshold: 90

@@ -1,4 +1,3 @@
-# Modified by Antigravity
 import os
 import sys
 from rich.panel import Panel
@@ -31,18 +30,8 @@ def print_banner():
 
 def main():
     """Main entry point for the CLI."""
-    # Add the parent directory to sys.path to allow importing 'fortscript'
-    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if parent_dir not in sys.path:
-        sys.path.append(parent_dir)
-
-    try:
-        from fortscript import FortScript
-    except ImportError:
-        # Fallback if the path manipulation didn't work or if running installed
-        # This part assumes fortscript is installed or in path
-        import fortscript
-        from fortscript import FortScript
+    # Import the main class relative to this package or absolute
+    from fortscript.main import FortScript
 
     print_banner()
     # Use config from the same directory as cli.py

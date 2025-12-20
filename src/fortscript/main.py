@@ -101,7 +101,7 @@ class FortScript:
             # Check if the script is JS or TS
             elif script_path.endswith(".js") or script_path.endswith(".ts"):
                 try:
-                    subprocess.Popen(['pnpm', "run", "start", script_path],
+                    subprocess.Popen(['pnpm', "run", "start"],
                                      creationflags=subprocess.CREATE_NEW_CONSOLE)
 
                     print(

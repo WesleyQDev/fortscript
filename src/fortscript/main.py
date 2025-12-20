@@ -102,6 +102,7 @@ class FortScript:
             elif script_path.endswith(".js") or script_path.endswith(".ts"):
                 try:
                     subprocess.Popen(['pnpm', "run", "start"],
+                                     cwd=project_dir,
                                      creationflags=subprocess.CREATE_NEW_CONSOLE)
 
                     print(

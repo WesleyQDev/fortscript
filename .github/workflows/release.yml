@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+a[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
+
+env:
+  PACKAGE_NAME: "fortscript"
+  OWNER: "WesleyQDev"
+  TAP_NAME: "homebrew-fortscript"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  details:
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.release.outputs.new_version }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Tag and Version
+        id: release
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            # Assuming PEP 440 compliant tags (e.g. 1.0.0, 1.0.0rc1)
+            # If using hyphens (1.0.0-rc1), ensure consistency with Python packaging
+            echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+            echo "new_version=$TAG_NAME" >> "$GITHUB_OUTPUT"
+            echo "Tag: $TAG_NAME"
+          else
+            echo "No tag found"
+            exit 1
+          fi
+
+  check_pypi:
+    needs: details
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch information from PyPI
+        id: pypi_check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json || echo "404")
+          if [ "$response" == "200" ]; then
+            remote_version=$(curl -s https://pypi.org/pypi/${{ env.PACKAGE_NAME }}/json | jq -r .info.version)
+            echo "Latest PyPI version: $remote_version"
+            echo "remote_version=$remote_version" >> "$GITHUB_OUTPUT"
+          else
+            echo "Package not found on PyPI (New Package)."
+            echo "remote_version=0.0.0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compare versions
+        run: |
+          NEW_VERSION=${{ needs.details.outputs.new_version }}
+          REMOTE_VERSION=${{ steps.pypi_check.outputs.remote_version }}
+          
+          # Use sort -V for version comparison
+          if [ "$(printf '%s\n' "$REMOTE_VERSION" "$NEW_VERSION" | sort -V | tail -n 1)" == "$REMOTE_VERSION" ] && [ "$REMOTE_VERSION" != "0.0.0" ] && [ "$REMOTE_VERSION" != "$NEW_VERSION" ]; then
+            echo "Error: New version $NEW_VERSION is not greater than existing PyPI version $REMOTE_VERSION"
+            exit 1
+          elif [ "$REMOTE_VERSION" == "$NEW_VERSION" ]; then
+             echo "Warning: Version $NEW_VERSION already exists on PyPI. Skipping build? (Currently failing to avoid overwrite error)"
+             exit 1
+          fi
+          echo "Version check passed: $NEW_VERSION > $REMOTE_VERSION"
+
+  build_and_publish:
+    needs: [details, check_pypi]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+    permissions:
+      id-token: write  # IMPORTANT: Required for trusted publishing
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Sync version in pyproject.toml
+        run: |
+          # Updates the version in pyproject.toml to match the tag
+          sed -i 's/^version = ".*"/version = "${{ needs.details.outputs.new_version }}"/' pyproject.toml
+          echo "Updated pyproject.toml version to ${{ needs.details.outputs.new_version }}"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      - name: Build dist
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Using Trusted Publishing (OIDC)
+          print_hash: true
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ needs.details.outputs.tag_name }} dist/* \
+            --title "${{ needs.details.outputs.tag_name }}" \
+            --generate-notes
+
+  update_homebrew:
+    needs: [build_and_publish, details]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Dispatch Homebrew Update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.BREW_TAP_TOKEN }}
+          repository: ${{ env.OWNER }}/${{ env.TAP_NAME }}
+          event-type: "update-formula"
+          client-payload: |-
+            { 
+              "formula_version": "${{ needs.details.outputs.new_version }}", 
+              "formula_name": "${{ env.PACKAGE_NAME }}",
+              "formula_url": "https://github.com/${{ env.OWNER }}/${{ env.PACKAGE_NAME }}/releases/download/${{ needs.details.outputs.tag_name }}/${{ env.PACKAGE_NAME }}-${{ needs.details.outputs.new_version }}.tar.gz"
+            }

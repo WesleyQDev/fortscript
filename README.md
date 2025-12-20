@@ -118,8 +118,8 @@ The following list tracks the progress of our features and future implementation
 - [x] **Monitor Heavy Processes**: Detection of resource-intensive applications.
 - [x] **RAM Usage Monitoring**: Automatic triggers based on memory percentage.
 - [x] **Unified Script Runner**:
-    - [x] Native Executables (`.exe`)
-    - [ ] Python Scripts (`.py`)
+    - [ ] Native Executables (`.exe`)
+    - [X] Python Scripts (`.py`)
     - [ ] JavaScript/TypeScript Projects (`package.json`)
 - [ ] **System Integration**:
     - [ ] Auto-start with Windows/Linux.

@@ -28,7 +28,38 @@ fort = "fortscript.cli.cli:main"
 Repository = "https://github.com/WesleyQDev/fortscript"
 
 
-
 [build-system]
-requires = ["uv_build >= 0.9.17, <0.10.0"]
-build-backend = "uv_build"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.10",
+    "taskipy>=1.2.1",
+]
+
+[tool.ruff]
+line-length = 79
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ['I','F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = '-p no:warnings'
+
+[tool.taskipy.tasks]
+lint = "ruff check ."
+pre_format = 'ruff check --fix'
+format = "ruff format ."
+run = 'python -m fortscript.cli.cli'
+pre_test = "task lint"
+test = "pytest -s -x --cov=fortscript -vv"
+post_test = 'coverage html'

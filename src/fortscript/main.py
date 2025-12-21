@@ -1,8 +1,9 @@
-from rich import print
 import subprocess
 import time
+
 import psutil
 import yaml
+from rich import print
 
 
 class RamMonitoring:

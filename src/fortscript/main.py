@@ -22,7 +22,8 @@ class AppsMonitoring:
         Initializes the application monitoring with a list of heavy processes.
 
         Args:
-            heavy_processes_list (list): A list of dictionaries containing process info.
+            heavy_processes_list (list): A list of dictionaries containing
+                process info.
         """
         self.heavy_processes_list = heavy_processes_list
 
@@ -31,7 +32,8 @@ class AppsMonitoring:
         Check which heavy processes from the list are currently running.
 
         Returns:
-            dict: A dictionary mapping process names to a boolean indicating if they are active.
+            dict: A dictionary mapping process names to a boolean indicating if
+             they are active.
         """
         status = {item['name']: False for item in self.heavy_processes_list}
         for proc in psutil.process_iter(['name']):
@@ -48,7 +50,7 @@ class AppsMonitoring:
 class FortScript:
     """Main class to manage scripts and monitor application status."""
 
-    def __init__(self, config_path="config.yaml"):
+    def __init__(self, config_path='config.yaml'):
         """
         Initializes FortScript with the configuration file.
 
@@ -76,7 +78,7 @@ class FortScript:
         Returns:
             dict: The loaded configuration.
         """
-        with open(path, "r") as file:
+        with open(path, 'r') as file:
             config = yaml.safe_load(file)
         return config
 
@@ -88,39 +90,58 @@ class FortScript:
             script_path = project.get('path')
 
             # Check if the script is Python
-            if script_path.endswith(".py"):
+            if script_path.endswith('.py'):
                 try:
-                    proc = subprocess.Popen(['uv', "run", script_path],
-                                            creationflags=subprocess.CREATE_NEW_CONSOLE)
+                    proc = subprocess.Popen(
+                        ['uv', 'run', script_path],
+                        creationflags=subprocess.CREATE_NEW_CONSOLE,
+                    )
                     self.active_processes.append(proc)
                     print(
-                        f"Project: [bold blue]{project_name}[/bold blue] \n Script: [red]{script_path}[/red] started successfully!\n")
+                        f"""Project: [bold blue]{project_name}[/bold blue]
+                        Script: [red]{script_path}[/red]
+                        started successfully!"""
+                    )
 
                 except Exception as e:
                     print(
-                        f"[bold red]Error executing {project_name}:[/bold red] {e}")
+                        f'[bold red]Error executing {project_name}:[/bold red]'
+                        f'{e}'
+                    )
             # Check if the script is JS or TS
-            elif script_path.endswith(".js") or script_path.endswith(".ts"):
+            elif script_path.endswith('.js') or script_path.endswith('.ts'):
                 try:
-                    subprocess.Popen(['pnpm', "run", "start"],
-                                     cwd=project_dir,
-                                     creationflags=subprocess.CREATE_NEW_CONSOLE)
+                    subprocess.Popen(
+                        ['pnpm', 'run', 'start'],
+                        creationflags=subprocess.CREATE_NEW_CONSOLE,
+                    )
 
                     print(
-                        f"Project: [bold blue]{project_name}[/bold blue] \n Script: [red]{script_path}[/red] started successfully!\n")
+                        f'Project: [bold blue]{project_name}[/bold blue] '
+                        '\n Script: [red]{script_path}[/red]'
+                        'started successfully!\n'
+                    )
 
                 except Exception as e:
                     print(
-                        f"[bold red]Error executing {project_name}:[/bold red] {e}")
+                        f'[bold red]Error executing {project_name}:[/bold red]'
+                        f'{e}'
+                    )
 
             # Invalid extension handling
             else:
                 print(
-                    f"""[yellow]Warning:[/yellow] The project {project_name} was skipped (invalid extension). \n Try again with a script:[red] [.py, .js, .ts or .exe]""")
+                    f'[yellow]Warning:[/yellow] The project {project_name}'
+                    'was skipped (invalid extension).'
+                    '\n Try again with a script:[red] [.py, .js, .ts or .exe]'
+                )
 
     def stop_scripts(self):
         """Terminates active scripts and their child processes."""
-        print("[yellow]Closing active scripts and their child processes...[/yellow]")
+        print(
+            '[yellow]Closing active scripts and'
+            'their child processes...[/yellow]'
+        )
         for proc in self.active_processes:
             try:
                 # 1. Get the process by PID using psutil
@@ -137,7 +158,7 @@ class FortScript:
                 pass
 
         self.active_processes = []
-        print("[green]All processes have been terminated.[/green]")
+        print('[green]All processes have been terminated.[/green]')
 
     def process_manager(self):
         """Manages scripts based on heavy process activity and RAM usage."""
@@ -153,26 +174,37 @@ class FortScript:
                 if is_heavy_process_open:
                     detected = [k for k, v in status_dict.items() if v]
                     print(
-                        f"[bold red]Closing scripts due to heavy processes:[/bold red] {detected}")
+                        f"""[bold red]Closing scripts due to heavy processes:
+                        [/bold red]{detected}"""
+                    )
                 else:
                     print(
-                        f"[bold red]Closing scripts due to high RAM usage:[/bold red] {current_ram}%")
+                        f"""[bold red]Closing scripts due to high RAM usage:
+                        [/bold red] {current_ram}%"""
+                    )
 
                 self.stop_scripts()
-                print("[yellow]Scripts stopped.[/yellow]")
+                print('[yellow]Scripts stopped.[/yellow]')
                 script_running = False
-            elif not is_heavy_process_open and not is_ram_critical and not script_running:
+            elif (
+                not is_heavy_process_open
+                and not is_ram_critical
+                and not script_running
+            ):
                 print(
-                    f"[bold green]System stable (RAM: {current_ram}%). Restarting scripts...[/bold green]")
+                    f"""[bold green]System stable (RAM: {current_ram}%).
+                    Restarting scripts...[/bold green]"""
+                )
                 self.start_scripts()
                 script_running = True
             elif not is_heavy_process_open:
-                # Optional: showing status even when already running, or just pass
+                # Optional: showing status even when already running,
+                # or just pass
                 pass
 
             time.sleep(5)
 
     def run(self):
         """Runs the main application loop."""
-        print("Running...")
+        print('Running...')
         self.process_manager()

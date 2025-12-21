@@ -1,1 +1,1 @@
-from .main import FortScript
+from .main import FortScript as FortScript

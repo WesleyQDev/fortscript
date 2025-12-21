@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 
@@ -108,18 +109,23 @@ class FortScript:
                         f'[bold red]Error executing {project_name}:[/bold red]'
                         f'{e}'
                     )
-            # Check if the script is JS or TS
-            elif script_path.endswith('.js') or script_path.endswith('.ts'):
+            elif script_path.endswith('package.json'):
                 try:
-                    subprocess.Popen(
-                        ['pnpm', 'run', 'start'],
+                    project_dir = os.path.dirname(script_path)
+                    command = ['npm', 'run', 'start']
+                    if os.name == 'nt':
+                        command[0] = 'npm.cmd'
+
+                    proc = subprocess.Popen(
+                        command,
+                        cwd=project_dir,
                         creationflags=subprocess.CREATE_NEW_CONSOLE,
                     )
+                    self.active_processes.append(proc)
 
                     print(
                         f'Project: [bold blue]{project_name}[/bold blue] '
-                        '\n Script: [red]{script_path}[/red]'
-                        'started successfully!\n'
+                        'started successfully!'
                     )
 
                 except Exception as e:

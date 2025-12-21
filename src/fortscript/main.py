@@ -89,12 +89,27 @@ class FortScript:
         for project in self.projects:
             project_name = project.get('name')
             script_path = project.get('path')
+            project_dir = os.path.dirname(script_path)
 
             # Check if the script is Python
             if script_path.endswith('.py'):
                 try:
+                    if os.name == 'nt':
+                        venv_python = os.path.join(
+                            project_dir, '.venv', 'Scripts', 'python.exe'
+                        )
+                    else:
+                        venv_python = os.path.join(
+                            project_dir, '.venv', 'bin', 'python'
+                        )
+
+                    python_exe = (
+                        venv_python if os.path.exists(
+                            venv_python) else 'python'
+                    )
+
                     proc = subprocess.Popen(
-                        ['uv', 'run', script_path],
+                        [python_exe, script_path],
                         creationflags=subprocess.CREATE_NEW_CONSOLE,
                     )
                     self.active_processes.append(proc)
@@ -111,7 +126,6 @@ class FortScript:
                     )
             elif script_path.endswith('package.json'):
                 try:
-                    project_dir = os.path.dirname(script_path)
                     command = ['npm', 'run', 'start']
                     if os.name == 'nt':
                         command[0] = 'npm.cmd'

@@ -1,13 +1,20 @@
-# FortScript
 
-![Terminal](docs/terminal.png)
+![Logo](docs/logo.png)
+<div align="center">
+  <a href="https://github.com/WesleyQDev/fortscript">English</a>
+  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <a href="https://github.com/WesleyQDev/fortscript/blob/main/README_ptBR.md">Português</a>
+  <br />
+</div>
 
-Um supervisor de processos com controle de execução inteligente baseado no estado dos recursos do sistema e atividade de aplicações.
+## O que é Fortscript?
 
-[English](README.md) | [Português](README_ptBR.md)
+Fortscript é um supervisor de processos com controle de execução inteligente baseado no estado dos recursos do sistema e atividade de aplicações.
 
 
-## 1. Biblioteca Python
+
+
+## Biblioteca Python
 
 O FortScript atua como uma camada de controle inteligente para os scripts e serviços do seu projeto. Ele permite automatizar a pausa e a retomada de processos baseado em gatilhos ambientais, como o uso de memória RAM ou a execução de aplicativos específicos.
 

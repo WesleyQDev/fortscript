@@ -1,28 +1,55 @@
-# FortScript
 
-A process supervisor with execution control based on system resource state.
+![Logo](docs/logo.png)
+<div align="center">
+  <a href="https://github.com/WesleyQDev/fortscript">English</a>
+  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  <a href="https://github.com/WesleyQDev/fortscript/blob/main/README_ptBR.md">Português</a>
+  <br />
+</div>
 
-[English](README.md) | [Português](README_ptBR.md)
+## What is Fortscript?
 
+Fortscript is a process supervisor with intelligent execution control based on system resource status and application activity.
 
-## 1. Python Library
+## Python Library
 
-FortScript can be integrated into any Python project as a library to manage child scripts.
+FortScript acts as an intelligent control layer for your project's scripts and services. It allows automating the pausing and resuming of processes based on environmental triggers, such as RAM usage or the execution of specific applications.
 
-You can use FortScript to start scripts and stop them when a certain amount of RAM is used. Or when a specific application/process is started.
+The main focus is **development convenience**: ensuring that your support modules (bots, local APIs, workers) run only when the system has available resources or when you are not in a task that requires full hardware focus (such as games or video editing).
 
-A use case, for example, would be to use the library to create a Gaming Mode, where within your project you can define scripts that will be paused when specific games are started and resumed when the games are closed.
+### Prerequisites
+
+Before installing, make sure you meet the following requirements:
+
+- **Python**: Version 3.12 or higher.
+- **Node.js**: (Optional) Only required if you are managing JavaScript/TypeScript projects.
+- **Package Manager**: We recommend [uv](https://github.com/astral-sh/uv) for a faster experience, although it is not mandatory.
 
 ### Installation
-FortScript was developed using UV. We recommend using UV to install the library.
 
+You can install FortScript using your preferred package manager:
+
+**Using UV (Recommended):**
 ```bash
 uv add fortscript
 ```
 
-If you are using standard Python, you can install the FortScript library with pip.
-
+**Using Poetry:**
 ```bash
+poetry add fortscript
+```
+
+**Virtual Environment (Manual):**
+```bash
+python -m venv .venv
+
+# On Windows:
+.venv\Scripts\activate
+
+# On Linux/macOS:
+source .venv/bin/activate
+
+# After activating, install:
 pip install fortscript
 ```
 
@@ -31,111 +58,97 @@ pip install fortscript
 from fortscript import FortScript
 
 # Initialize with a configuration file
-app = FortScript(config_path="my_config.yaml")
+app = FortScript(config_path="fort_config.yaml")
 
 # Run the management loop
 app.run()
 ```
 
-### Why use the library?
--   **Clean Lifecycle**: Safely start and stop child processes (including full process trees).
--   **Resource Monitoring**: Built-in hooks for RAM usage and process activity.
--   **Multi-Runtime**: Supports Python, Node.js (pnpm) and Native Executables.
+### Main Features
+-   **Intelligent Orchestration**: Automatically pauses scripts when detecting configured "heavy" processes.
+-   **Resource Management**: Protects system stability by terminating linked processes if RAM hits the defined limit.
+-   **Native Compatibility**: Automatically detects and utilizes `.venv` environments within Python script folders.
+-   **Full-Stack Support**: Manages Node.js projects through the detection of `package.json` files.
 
-#### 1. Managing Independent Modules
-You can use FortScript as a central controller for various scripts scattered across your system.
+#### 1. Managing Project Modules
+FortScript shines when managing various components of the same ecosystem. Instead of manually running each script, you centralize control.
+
+**Example of supported structure:**
+```text
+my_project/
+├── bot_service/
+│   ├── .venv/
+│   └── main.py
+├── api_node/
+│   ├── node_modules/
+│   └── package.json
+└── dashboard.py (FortScript Manager)
+```
 
 **config.yaml**:
 ```yaml
-# List of projects to be managed
+# Internal project modules
 projects:
-  - name: "Trading Bot"
-    path: "C:/Users/Dev/Finance/bot.py"
-  - name: "Server Monitor"
-    path: "C:/Users/Dev/Server/monitor.js"
+  - name: "Python Worker"
+    path: "./bot_service/main.py"
+  - name: "Node Server"
+    path: "./api_node/package.json"
 
-# Processes that, when detected, will pause your projects
+# Processes that will pause the above scripts
 heavy_processes:
-  - name: "Fortnite"
-    process: "fortnite"
-  - name: "Video Editor"
-    process: "resolve"
+  - name: "GTA V"
+    process: "gta5"
+  - name: "Obs Studio"
+    process: "obs64"
 
-# RAM usage percentage threshold to trigger safe shutdown
-ram_threshold: 90
+# Security limit (RAM %)
+ram_threshold: 85
 ```
-
-#### 2. Integration in larger projects
-Import `FortScript` in your main application entry point to automatically handle background tasks.
-
-```python
-# main_controller.py
-from fortscript import FortScript
-
-def start_services():
-    # Detects games/heavy apps and pauses these services automatically
-    manager = FortScript(config_path="./services_config.yaml")
-    manager.run()
-```
-
-### Configuration Options
-
-The `config.yaml` file supports the following fields:
-
-| Field | Description | Type | Default |
-| :--- | :--- | :--- | :--- |
-| `projects` | List of applications to manage. Each item needs a `name` and `path`. | List | `[]` |
-| `heavy_processes` | List of processes that trigger a pause. Each item needs a `name` and `process` (part of the executable name). | List | `[]` |
-| `ram_threshold` | Maximum RAM usage percentage allowed before stopping scripts. | Integer | `80` |
 
 ---
 
 ## 2. CLI
 
-The CLI is an interface designed for a broad audience, allowing for easy process management.
+The CLI allows you to use the full power of FortScript directly through the terminal, without needing to write additional Python code, using only the configuration file.
 
-### Usage
-If you are developing locally:
+> **⚠️ Note:** The CLI is under **development**. Although project auto-detection is still being refined, the base command to run the `config.yaml` file is already operational.
+
+### Global CLI Installation (Recommended)
+To use the `fort` command anywhere on the system, we recommend installing via **pipx**:
+
 ```bash
-uv run fort
+pipx install fortscript
 ```
-After installation, simply run:
+
+### How to use
+Navigate to your project folder (where `config.yaml` is) and run:
+
 ```bash
 fort
 ```
-
-- **Configuration**: The CLI looks for a `config.yaml` file in the same directory as the script.
-- **Auto-detection**: Soon, it will be possible to add the main initialization script to the CLI by running a single command inside the project folder.
 
 ---
 
 ## Roadmap & Features
 
-The following list tracks the progress of our features and future implementations:
-
-- [x] **Monitor Heavy Processes**: Detection of applications that consume many resources.
-- [x] **Monitor RAM Usage**: Automatic triggers based on memory percentage.
-- [x] **Unified Script Executor**:
-    - [ ] Native Executables (`.exe`)
-    - [x] Python Scripts (`.py`)
-    - [ ] JavaScript/TypeScript Projects (`package.json`)
-- [ ] **System Integration**:
-    - [ ] Auto-start with Windows/Linux.
-    - [ ] System Tray (icon in the taskbar) for background operation.
-- [x] **Smart Interruption**:
-    - [x] Automatic stop when heavy processes are detected.
-    - [x] Automatic resume when processes are closed.
-    - [x] Stop/resume cycle based on RAM.
+- [x] **Monitor Heavy Processes**: Detection of resource-intensive apps.
+- [x] **Monitor RAM Usage**: Automatic triggers based on percentage.
+- [x] **Unified Executor**:
+    - [x] Python Scripts (`.py`) with automatic `.venv` support.
+    - [x] Node.js Projects (`package.json`) via `npm`.
+    - [ ] Native executables (`.exe`).
+- [x] **Tree-kill**: Correctly terminates the entire process tree (avoids orphan processes).
+- [ ] **System Tray Interface**: Silent background operation.
 
 ---
 
-## Contributing
+## Contribution
 
-Contributions are welcome! Please read our [Contribution Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+Contributions are vital! See our [Contribution Guide](CONTRIBUTING.md) to find out how to help.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ---
 

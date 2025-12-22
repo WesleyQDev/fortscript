@@ -1,12 +1,10 @@
-<div align="center" id="top">
+<div align="center">
   <a href="https://pypi.org/project/fortscript/">
-    <picture>
-      <img src="docs/logo.png" alt="FortScript">
-    </picture>
+    <img src="docs/logo.png" alt="FortScript" width="400">
   </a>
+</div>
 
-  <br />
-
+<p align="center">
   <a href="https://pypi.org/project/fortscript/">
     <img src="https://img.shields.io/pypi/v/fortscript?style=flat-square&color=blue" alt="PyPI">
   </a>
@@ -16,14 +14,13 @@
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
   </a>
-</div>
+</p>
 
-<div align="center">
+<p align="center">
   <a href="https://github.com/WesleyQDev/fortscript">English</a>
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://github.com/WesleyQDev/fortscript/blob/main/README_ptBR.md">Português</a>
-  <br />
-</div>
+  &nbsp;•&nbsp;
+  <a href="https://github.com/WesleyQDev/fortscript/blob/main/README_ptBR.md"><strong>Português</strong></a>
+</p>
 
 <br />
 

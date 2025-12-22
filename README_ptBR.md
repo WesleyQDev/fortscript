@@ -1,8 +1,20 @@
 <div align="center" id="top">
   <a href="https://pypi.org/project/fortscript/">
     <picture>
-      <img src="docs\logo.png" alt="FortScript">
+      <img src="docs/logo.png" alt="FortScript">
     </picture>
+  </a>
+
+  <br />
+
+  <a href="https://pypi.org/project/fortscript/">
+    <img src="https://img.shields.io/pypi/v/fortscript?style=flat-square&color=blue" alt="PyPI">
+  </a>
+  <a href="https://pypi.org/project/fortscript/">
+    <img src="https://img.shields.io/pypi/pyversions/fortscript?style=flat-square" alt="Python">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
   </a>
 </div>
 
@@ -13,159 +25,209 @@
   <br />
 </div>
 
-## O que é Fortscript?
+<br />
 
-Fortscript é um supervisor de processos com controle de execução inteligente baseado no estado dos recursos do sistema e atividade de aplicações.
+## O que é FortScript?
 
-## Biblioteca Python
+Você já deixou um bot, uma API ou um script rodando em segundo plano enquanto jogava, e o jogo começou a travar? Ou esqueceu processos consumindo memória até o PC ficar lento?
 
-O FortScript atua como uma camada de controle inteligente para os scripts e serviços do seu projeto. Ele permite automatizar a pausa e a retomada de processos baseado em gatilhos ambientais, como o uso de memória RAM ou a execução de aplicativos específicos.
+**FortScript resolve isso automaticamente.** Ele pausa seus scripts quando você abre um jogo ou aplicativo pesado, e retoma quando você fecha. Simples assim.
 
-O foco principal é a **conveniência no desenvolvimento**: garantir que seus módulos de suporte (bots, APIs locais, workers) rodem apenas quando o sistema tem recursos disponíveis ou quando você não está em uma tarefa que exija foco total do hardware (como jogos ou edição de vídeo).
+### Como funciona
 
-### Pré-requisitos
+1. Você define quais scripts quer gerenciar (bots Python, projetos Node.js, etc.)
+2. Você define quais aplicativos são "pesados" (jogos, editores de vídeo, etc.)
+3. O FortScript monitora e faz o resto: pausa quando necessário, retoma quando possível.
 
-Antes de instalar, certifique-se de ter os seguintes requisitos:
+## Instalação
 
-- **Python**: Versão 3.12 ou superior.
-- **Node.js**: (Opcional) Necessário apenas se você for gerenciar projetos JavaScript/TypeScript.
-- **Gerenciador de Pacotes**: Recomendamos o [uv](https://github.com/astral-sh/uv) para uma experiência mais rápida, embora não seja obrigatório.
+O FortScript pode ser usado de **duas formas**: como biblioteca Python ou via linha de comando (CLI). Ambas vêm no mesmo pacote.
 
-### Instalação
+### Instalação como dependência do projeto
 
-Você pode instalar o FortScript utilizando o gerenciador de sua preferência:
-
-**Usando UV (Recomendado):**
+Use esta opção se você quer integrar o FortScript em um projeto Python existente:
 
 ```bash
+# UV (recomendado)
 uv add fortscript
-```
 
-**Usando Poetry:**
-
-```bash
+# Poetry
 poetry add fortscript
-```
 
-**Ambiente Virtual (Manual):**
-
-```bash
-python -m venv .venv
-
-# No Windows:
-.venv\Scripts\activate
-
-# No Linux/macOS:
-source .venv/bin/activate
-
-# Após ativar, instale:
+# pip
 pip install fortscript
 ```
 
-### Início Rápido
+### Instalação global (CLI)
 
-```python
-from fortscript import FortScript
-
-# Inicialize com um arquivo de configuração
-app = FortScript(config_path="fort_config.yaml")
-
-# Execute o loop de gerenciamento
-app.run()
-```
-
-### Funcionalidades Principais
-
-- **Orquestração Inteligente**: Pausa scripts automaticamente ao detectar processos "pesados" configurados.
-- **Gestão de Recursos**: Protege a estabilidade do sistema encerrando processos vinculados se a RAM atingir o limite definido.
-- **Compatibilidade Nativa**: Detecta e utiliza automaticamente ambientes `.venv` dentro das pastas dos scripts Python.
-- **Suporte Full-Stack**: Gerencia projetos Node.js através da detecção de arquivos `package.json`.
-
-#### 1. Gerenciando Módulos do Projeto
-
-O FortScript brilha ao gerenciar diversos componentes de um mesmo ecossistema. Em vez de rodar manualmente cada script, você centraliza o controle.
-
-**Exemplo de estrutura suportada:**
-
-```text
-meu_projeto/
-├── bot_servico/
-│   ├── .venv/
-│   └── main.py
-├── api_node/
-│   ├── node_modules/
-│   └── package.json
-└── dashboard.py (Gerenciador FortScript)
-```
-
-**config.yaml**:
-
-```yaml
-# Módulos internos do projeto
-projects:
-  - name: "Worker Python"
-    path: "./bot_servico/main.py"
-  - name: "Servidor Node"
-    path: "./api_node/package.json"
-
-# Processos que pausarão os scripts acima
-heavy_processes:
-  - name: "GTA V"
-    process: "gta5"
-  - name: "Obs Studio"
-    process: "obs64"
-
-# Limite de segurança (RAM %)
-ram_threshold: 85
-```
-
----
-
-## 2. CLI
-
-A CLI permite que você utilize todo o poder do FortScript diretamente pelo terminal, sem precisar escrever código Python adicional, usando apenas o arquivo de configuração.
-
-> **⚠️ Nota:** A CLI está em **desenvolvimento**. Embora a auto-detecção de projetos ainda esteja sendo refinada, o comando base para rodar o arquivo `config.yaml` já está operacional.
-
-### Instalação Global da CLI (Recomendado)
-
-Para usar o comando `fort` em qualquer lugar do sistema, recomendamos a instalação via **pipx**:
+Use esta opção se você quer usar o comando `fort` diretamente no terminal, sem escrever código:
 
 ```bash
 pipx install fortscript
 ```
 
-### Como usar
+### Pré-requisitos
 
-Navegue até a pasta do seu projeto (onde está o `config.yaml`) e execute:
-
-```bash
-fort
-```
+- **Python 3.12+**
+- **Node.js** (apenas se for gerenciar projetos JavaScript/TypeScript)
 
 ---
 
-## Roadmap & Funcionalidades
+## Configuração
 
-- [x] **Monitorar Processos Pesados**: Detecção de apps que consomem muitos recursos.
-- [x] **Monitorar Uso de RAM**: Gatilhos automáticos baseados em porcentagem.
-- [x] **Executor Unificado**:
-  - [x] Scripts Python (`.py`) com suporte automático a `.venv`.
-  - [x] Projetos Node.js (`package.json`) via `npm`.
-  - [ ] Executáveis nativos (`.exe`).
-- [x] **Tree-kill**: Encerra corretamente toda a árvore de processos (evita processos órfãos).
-- [ ] **Interface de Bandeja (System Tray)**: Operação silenciosa em segundo plano.
+Independente de como você usa o FortScript (código ou CLI), a configuração é feita através de um arquivo `config.yaml`:
+
+```yaml
+# Scripts que o FortScript vai gerenciar
+projects:
+  - name: "Meu Bot Discord"
+    path: "./bot/main.py"
+  - name: "API Node"
+    path: "./api/package.json"
+
+# Aplicativos que vão pausar os scripts acima
+heavy_processes:
+  - name: "GTA V"
+    process: "gta5"
+  - name: "OBS Studio"
+    process: "obs64"
+
+# Pausa os scripts se a RAM ultrapassar este limite (%)
+ram_threshold: 85
+```
+
+**Explicação:**
+- `projects`: Lista de scripts/projetos que o FortScript vai iniciar e gerenciar.
+- `heavy_processes`: Quando qualquer um desses aplicativos abrir, os scripts são pausados.
+- `ram_threshold`: Se a RAM do sistema ultrapassar esse valor, os scripts também são pausados.
+
+### Tipos de projeto suportados
+
+| Tipo | Extensão | Comportamento |
+|------|----------|---------------|
+| Python | `.py` | Detecta automaticamente `.venv` na pasta do script |
+| Node.js | `package.json` | Executa `npm run start` |
+
+---
+
+## Como Usar
+
+### Opção 1: Via código Python
+
+Ideal para integrar o FortScript em um projeto existente ou ter controle programático:
+
+```python
+from fortscript import FortScript
+
+app = FortScript(config_path="config.yaml")
+app.run()
+```
+
+### Opção 2: Via CLI (terminal)
+
+Ideal para uso rápido sem escrever código:
+
+```bash
+# Navegue até a pasta com seu config.yaml
+cd meu_projeto
+
+# Execute
+fort
+```
+
+> **Nota:** A CLI atualmente executa o FortScript a partir do `config.yaml`. Comandos adicionais como `fort add` estão planejados para versões futuras.
+
+---
+
+## Exemplo Prático
+
+Imagine que você tem a seguinte estrutura de projeto:
+
+```text
+meu_projeto/
+├── bot_discord/
+│   ├── .venv/
+│   └── main.py
+├── api_express/
+│   ├── node_modules/
+│   └── package.json
+├── config.yaml
+└── gerenciador.py
+```
+
+O `gerenciador.py` seria:
+
+```python
+from fortscript import FortScript
+
+app = FortScript(config_path="config.yaml")
+app.run()
+```
+
+Quando você abrir o GTA V, o FortScript automaticamente:
+1. Pausa o bot Discord
+2. Pausa a API Express
+3. Exibe no terminal o motivo da pausa
+
+Quando você fechar o GTA V, tudo volta a funcionar automaticamente.
+
+---
+
+## Roadmap
+
+### Biblioteca
+
+- [ ] **Suporte a `.exe`**: Gerenciar executáveis diretamente.
+- [ ] **Configuração via argumentos**: Passar `projects`, `heavy_processes` e `ram_threshold` diretamente no código, sem precisar de arquivo YAML.
+- [ ] **Funções customizadas**: Gerenciar funções Python além de arquivos externos.
+- [ ] **Módulo Games**: Lista pré-definida de jogos populares.
+
+**Prévia do módulo Games:**
+
+```python
+from fortscript import FortScript
+from fortscript.games import GAMES
+
+# GAMES contém dezenas de jogos populares
+app = FortScript(heavy_processes=GAMES)
+app.run()
+```
+
+| Jogos incluídos | |
+|-----------------|---|
+| Minecraft, GTA V, Fortnite | Counter-Strike 2, Valorant, League of Legends |
+| Roblox, Apex Legends | ...e muitos outros |
+
+### CLI
+
+- [ ] **System Tray**: Rodar minimizado na bandeja do sistema.
+- [ ] **Comandos adicionais**:
+  - `fort add <path>` - Adicionar projeto ao config
+  - `fort list` - Listar projetos configurados
+  - `fort remove <name>` - Remover projeto
+
+---
+
+## Funcionalidades Atuais
+
+- [x] Pausa automática ao detectar aplicativos pesados
+- [x] Pausa automática por limite de RAM
+- [x] Suporte a scripts Python com detecção de `.venv`
+- [x] Suporte a projetos Node.js via `npm run start`
+- [x] Encerramento seguro de processos (tree-kill)
 
 ---
 
 ## Contribuição
 
-Contribuições são fundamentais! Veja o nosso [Guia de Contribuição](CONTRIBUTING.md) para saber como ajudar.
+Contribuições são bem-vindas! Veja o [Guia de Contribuição](CONTRIBUTING.md) para começar.
 
 ## Licença
 
-Distribuído sob a Licença MIT. Veja `LICENSE` para mais informações.
+MIT - Veja [LICENSE](LICENSE) para detalhes.
 
 ---
 
-Desenvolvido com ❤️ por [WesleyQDev](https://github.com/WesleyQDev)
+<div align="center">
+  Desenvolvido com ❤️ por <a href="https://github.com/WesleyQDev">WesleyQDev</a>
+</div>

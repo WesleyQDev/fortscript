@@ -1,5 +1,11 @@
+<div align="center" id="top">
+  <a href="https://pypi.org/project/fortscript/">
+    <picture>
+      <img src="docs\logo.png" alt="FortScript">
+    </picture>
+  </a>
+</div>
 
-![Logo](docs/logo.png)
 <div align="center">
   <a href="https://github.com/WesleyQDev/fortscript">English</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
@@ -30,16 +36,19 @@ Before installing, make sure you meet the following requirements:
 You can install FortScript using your preferred package manager:
 
 **Using UV (Recommended):**
+
 ```bash
 uv add fortscript
 ```
 
 **Using Poetry:**
+
 ```bash
 poetry add fortscript
 ```
 
 **Virtual Environment (Manual):**
+
 ```bash
 python -m venv .venv
 
@@ -54,6 +63,7 @@ pip install fortscript
 ```
 
 ### Quick Start
+
 ```python
 from fortscript import FortScript
 
@@ -65,15 +75,18 @@ app.run()
 ```
 
 ### Main Features
--   **Intelligent Orchestration**: Automatically pauses scripts when detecting configured "heavy" processes.
--   **Resource Management**: Protects system stability by terminating linked processes if RAM hits the defined limit.
--   **Native Compatibility**: Automatically detects and utilizes `.venv` environments within Python script folders.
--   **Full-Stack Support**: Manages Node.js projects through the detection of `package.json` files.
+
+- **Intelligent Orchestration**: Automatically pauses scripts when detecting configured "heavy" processes.
+- **Resource Management**: Protects system stability by terminating linked processes if RAM hits the defined limit.
+- **Native Compatibility**: Automatically detects and utilizes `.venv` environments within Python script folders.
+- **Full-Stack Support**: Manages Node.js projects through the detection of `package.json` files.
 
 #### 1. Managing Project Modules
+
 FortScript shines when managing various components of the same ecosystem. Instead of manually running each script, you centralize control.
 
 **Example of supported structure:**
+
 ```text
 my_project/
 ├── bot_service/
@@ -86,6 +99,7 @@ my_project/
 ```
 
 **config.yaml**:
+
 ```yaml
 # Internal project modules
 projects:
@@ -114,6 +128,7 @@ The CLI allows you to use the full power of FortScript directly through the term
 > **⚠️ Note:** The CLI is under **development**. Although project auto-detection is still being refined, the base command to run the `config.yaml` file is already operational.
 
 ### Global CLI Installation (Recommended)
+
 To use the `fort` command anywhere on the system, we recommend installing via **pipx**:
 
 ```bash
@@ -121,6 +136,7 @@ pipx install fortscript
 ```
 
 ### How to use
+
 Navigate to your project folder (where `config.yaml` is) and run:
 
 ```bash
@@ -134,9 +150,9 @@ fort
 - [x] **Monitor Heavy Processes**: Detection of resource-intensive apps.
 - [x] **Monitor RAM Usage**: Automatic triggers based on percentage.
 - [x] **Unified Executor**:
-    - [x] Python Scripts (`.py`) with automatic `.venv` support.
-    - [x] Node.js Projects (`package.json`) via `npm`.
-    - [ ] Native executables (`.exe`).
+  - [x] Python Scripts (`.py`) with automatic `.venv` support.
+  - [x] Node.js Projects (`package.json`) via `npm`.
+  - [ ] Native executables (`.exe`).
 - [x] **Tree-kill**: Correctly terminates the entire process tree (avoids orphan processes).
 - [ ] **System Tray Interface**: Silent background operation.
 

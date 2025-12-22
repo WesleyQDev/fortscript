@@ -1,5 +1,11 @@
+<div align="center" id="top">
+  <a href="https://pypi.org/project/fortscript/">
+    <picture>
+      <img src="docs\logo.png" alt="FortScript">
+    </picture>
+  </a>
+</div>
 
-![Logo](docs/logo.png)
 <div align="center">
   <a href="https://github.com/WesleyQDev/fortscript">English</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
@@ -10,9 +16,6 @@
 ## O que é Fortscript?
 
 Fortscript é um supervisor de processos com controle de execução inteligente baseado no estado dos recursos do sistema e atividade de aplicações.
-
-
-
 
 ## Biblioteca Python
 
@@ -33,16 +36,19 @@ Antes de instalar, certifique-se de ter os seguintes requisitos:
 Você pode instalar o FortScript utilizando o gerenciador de sua preferência:
 
 **Usando UV (Recomendado):**
+
 ```bash
 uv add fortscript
 ```
 
 **Usando Poetry:**
+
 ```bash
 poetry add fortscript
 ```
 
 **Ambiente Virtual (Manual):**
+
 ```bash
 python -m venv .venv
 
@@ -57,6 +63,7 @@ pip install fortscript
 ```
 
 ### Início Rápido
+
 ```python
 from fortscript import FortScript
 
@@ -68,15 +75,18 @@ app.run()
 ```
 
 ### Funcionalidades Principais
--   **Orquestração Inteligente**: Pausa scripts automaticamente ao detectar processos "pesados" configurados.
--   **Gestão de Recursos**: Protege a estabilidade do sistema encerrando processos vinculados se a RAM atingir o limite definido.
--   **Compatibilidade Nativa**: Detecta e utiliza automaticamente ambientes `.venv` dentro das pastas dos scripts Python.
--   **Suporte Full-Stack**: Gerencia projetos Node.js através da detecção de arquivos `package.json`.
+
+- **Orquestração Inteligente**: Pausa scripts automaticamente ao detectar processos "pesados" configurados.
+- **Gestão de Recursos**: Protege a estabilidade do sistema encerrando processos vinculados se a RAM atingir o limite definido.
+- **Compatibilidade Nativa**: Detecta e utiliza automaticamente ambientes `.venv` dentro das pastas dos scripts Python.
+- **Suporte Full-Stack**: Gerencia projetos Node.js através da detecção de arquivos `package.json`.
 
 #### 1. Gerenciando Módulos do Projeto
+
 O FortScript brilha ao gerenciar diversos componentes de um mesmo ecossistema. Em vez de rodar manualmente cada script, você centraliza o controle.
 
 **Exemplo de estrutura suportada:**
+
 ```text
 meu_projeto/
 ├── bot_servico/
@@ -89,6 +99,7 @@ meu_projeto/
 ```
 
 **config.yaml**:
+
 ```yaml
 # Módulos internos do projeto
 projects:
@@ -117,6 +128,7 @@ A CLI permite que você utilize todo o poder do FortScript diretamente pelo term
 > **⚠️ Nota:** A CLI está em **desenvolvimento**. Embora a auto-detecção de projetos ainda esteja sendo refinada, o comando base para rodar o arquivo `config.yaml` já está operacional.
 
 ### Instalação Global da CLI (Recomendado)
+
 Para usar o comando `fort` em qualquer lugar do sistema, recomendamos a instalação via **pipx**:
 
 ```bash
@@ -124,6 +136,7 @@ pipx install fortscript
 ```
 
 ### Como usar
+
 Navegue até a pasta do seu projeto (onde está o `config.yaml`) e execute:
 
 ```bash
@@ -137,9 +150,9 @@ fort
 - [x] **Monitorar Processos Pesados**: Detecção de apps que consomem muitos recursos.
 - [x] **Monitorar Uso de RAM**: Gatilhos automáticos baseados em porcentagem.
 - [x] **Executor Unificado**:
-    - [x] Scripts Python (`.py`) com suporte automático a `.venv`.
-    - [x] Projetos Node.js (`package.json`) via `npm`.
-    - [ ] Executáveis nativos (`.exe`).
+  - [x] Scripts Python (`.py`) com suporte automático a `.venv`.
+  - [x] Projetos Node.js (`package.json`) via `npm`.
+  - [ ] Executáveis nativos (`.exe`).
 - [x] **Tree-kill**: Encerra corretamente toda a árvore de processos (evita processos órfãos).
 - [ ] **Interface de Bandeja (System Tray)**: Operação silenciosa em segundo plano.
 

@@ -168,4 +168,4 @@ Distribuído sob a Licença MIT. Veja `LICENSE` para mais informações.
 
 ---
 
-Desenvolvido com ❤️ por [WesleyyDev](https://github.com/WesleyQDev)
+Desenvolvido com ❤️ por [WesleyQDev](https://github.com/WesleyQDev)

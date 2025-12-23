@@ -1,7 +1,9 @@
+import logging
 import os
 from importlib.metadata import version
 
 from rich.console import Console
+from rich.logging import RichHandler
 from rich.text import Text
 
 from fortscript import FortScript
@@ -16,7 +18,15 @@ console = Console()
 
 def main():
     """Main entry point for the CLI."""
-    # Header minimalista e elegante
+    # Configure logging with Rich
+    logging.basicConfig(
+        level="INFO",
+        format="%(message)s",
+        datefmt="[%X]",
+        handlers=[RichHandler(rich_tracebacks=True, show_path=False)]
+    )
+
+    # Minimalist and elegant header
     header = Text()
     header.append('', style='default')
     header.append('FORT', style='bold color(220)')

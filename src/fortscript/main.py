@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import sys
@@ -5,7 +6,8 @@ import time
 
 import psutil
 import yaml
-from rich import print
+
+logger = logging.getLogger(__name__)
 
 
 class RamMonitoring:
@@ -54,8 +56,11 @@ class FortScript:
 
     def __init__(
             self, config_path="fortscript.yaml",
-            projects=None, heavy_process=None,
-            ram_threshold=None):
+            projects=None,
+            heavy_process=None,
+            ram_threshold=None,
+            ram_safe=None
+            ):
         """
         Initializes FortScript with the configuration file.
 
@@ -72,6 +77,8 @@ class FortScript:
             self.file_config.get('heavy_processes') or [])
         self.ram_threshold = ram_threshold if ram_threshold is not None else (
             self.file_config.get('ram_threshold', 95))
+        self.ram_safe = ram_safe if ram_safe is not None else (
+            self.file_config.get('ram_safe', 85))
 
         self.is_windows = os.name == 'nt'
 
@@ -85,115 +92,100 @@ class FortScript:
                 with open(path, 'r') as file:
                     return yaml.safe_load(file) or {}
         except Exception as e:
-            print(f"[yellow]Warning: Could not load {path}: {e}[/yellow]")
+            logger.warning(f"Could not load {path}: {e}")
         return {}
 
     def start_scripts(self):
         """Starts all projects defined in the configuration."""
         self.active_processes = []  # Clear the list before starting
+
+        for project in self.projects:
+            self._start_project(project)
+
+    def _start_project(self, project):
+        """Starts a single project based on its configuration."""
+        project_name = project.get('name', 'Unknown Project')
+        script_path = project.get('path')
+
+        if not script_path:
+            logger.warning(
+                f"Project {project_name} "
+                f"skipped because it has no 'path' defined."
+            )
+            return
+
+        project_dir = os.path.dirname(script_path)
         creation_flags = 0
         if self.is_windows:
             creation_flags = subprocess.CREATE_NEW_CONSOLE
 
-        for project in self.projects:
-            project_name = project.get('name', 'Unknown Project')
-            script_path = project.get('path')
+        # Check if the script is Python
+        if script_path.endswith('.py'):
+            try:
+                if self.is_windows:
+                    venv_python = os.path.join(
+                        project_dir, '.venv', 'Scripts', 'python.exe'
+                    )
+                else:
+                    venv_python = os.path.join(
+                        project_dir, '.venv', 'bin', 'python'
+                    )
 
-            if not script_path:
-                print(
-                    f"[yellow]Warning: Project [bold]{project_name}[/bold] "
-                    f"skipped because it has no 'path' defined.[/yellow]"
+                python_exe = (
+                    venv_python if os.path.exists(venv_python)
+                    else sys.executable
                 )
-                continue
 
-            project_dir = os.path.dirname(script_path)
-
-            # Check if the script is Python
-            if script_path.endswith('.py'):
-
-                try:
-                    if self.is_windows:
-                        venv_python = os.path.join(
-                            project_dir, '.venv', 'Scripts', 'python.exe'
-                        )
-                    else:
-                        venv_python = os.path.join(
-                            project_dir, '.venv', 'bin', 'python'
-                        )
-
-                    python_exe = (
-                        venv_python if os.path.exists(
-                            venv_python) else sys.executable
-                    )
-
-                    proc = subprocess.Popen(
-                        [python_exe, script_path],
-                        creationflags=creation_flags,
-                    )
-                    self.active_processes.append(proc)
-                    print(
-                        f'Name: [bold blue]{project_name}[/bold blue]\n'
-                        f'Path: [red]{script_path}[/red] '
-                    )
-
-                except Exception as e:
-                    print(
-                        f'[bold red]Error executing {project_name}:[/bold red]'
-                        f'{e}'
-                    )
-            elif script_path.endswith('package.json'):
-                try:
-                    command = ['npm', 'run', 'start']
-                    if os.name == 'nt':
-                        command[0] = 'npm.cmd'
-
-                    proc = subprocess.Popen(
-                        command,
-                        cwd=project_dir,
-                        creationflags=creation_flags,
-                    )
-                    self.active_processes.append(proc)
-
-                    print(
-                        f'Project: [bold blue]{project_name}[/bold blue] '
-                        'started successfully!'
-                    )
-
-                except Exception as e:
-                    print(
-                        f'[bold red]Error executing {project_name}:[/bold red]'
-                        f'{e}'
-                    )
-
-            # Invalid extension handling
-            elif script_path.endswith('.exe') and self.is_windows:
-                try:
-                    command = ['cmd.exe', '/c', str(script_path)]
-
-                    proc = subprocess.Popen(
-                        command,
-                        cwd=str(project_dir),
-                        creationflags=creation_flags,
-                    )
-                    self.active_processes.append(proc)
-
-                except Exception as e:
-                    print(
-                        f'[bold red]Error executing {project_name}:[/bold red]'
-                        f'{e}'
-                    )
-            else:
-                print(
-                    f"\n[yellow]Warning:[/yellow] The project [bold]{project_name}[/bold] was skipped (invalid extension).\n"
-                    f"Try again with a script: [red][.py, .exe][/red] or a Node.js project with a [red]package.json[/red] in the folder."
+                proc = subprocess.Popen(
+                    [python_exe, script_path],
+                    creationflags=creation_flags,
                 )
+                self.active_processes.append(proc)
+                logger.info(f"Project started: {project_name} ({script_path})")
+
+            except Exception as e:
+                logger.error(f"Error executing {project_name}: {e}")
+
+        elif script_path.endswith('package.json'):
+            try:
+                command = ['npm', 'run', 'start']
+                if os.name == 'nt':
+                    command[0] = 'npm.cmd'
+
+                proc = subprocess.Popen(
+                    command,
+                    cwd=project_dir,
+                    creationflags=creation_flags,
+                )
+                self.active_processes.append(proc)
+                logger.info(f"Project: {project_name} started successfully!")
+
+            except Exception as e:
+                logger.error(f"Error executing {project_name}: {e}")
+
+        # Invalid extension handling
+        elif script_path.endswith('.exe') and self.is_windows:
+            try:
+                command = ['cmd.exe', '/c', str(script_path)]
+
+                proc = subprocess.Popen(
+                    command,
+                    cwd=str(project_dir),
+                    creationflags=creation_flags,
+                )
+                self.active_processes.append(proc)
+
+            except Exception as e:
+                logger.error(f"Error executing {project_name}: {e}")
+        else:
+            logger.warning(
+                f"The project {project_name} was skipped (invalid extension). "
+                "Try again with a script: [.py, .exe] or a Node.js project."
+            )
 
     def stop_scripts(self):
         """Terminates active scripts and their child processes."""
-        print(
-            '[yellow]Closing active scripts and'
-            'their child processes...[/yellow]'
-        )
+        logger.info('Closing active scripts and their child processes...')
         for proc in self.active_processes:
             try:
                 # 1. Get the process by PID using psutil
@@ -210,7 +202,7 @@ class FortScript:
                 pass
 
         self.active_processes = []
-        print('[green]All processes have been terminated.[/green]')
+        logger.info('All processes have been terminated.')
 
     def process_manager(self):
         """Manages scripts based on heavy process activity and RAM usage."""
@@ -220,32 +212,30 @@ class FortScript:
             is_heavy_process_open = any(status_dict.values())
 
             current_ram = self.ram_monitoring.get_percent()
-            is_ram_critical = current_ram > self.ram_threshold
+            is_ram_critical = current_ram > self.ram_threshold and current_ram
 
             if (is_heavy_process_open or is_ram_critical) and script_running:
                 if is_heavy_process_open:
                     detected = [k for k, v in status_dict.items() if v]
-                    print(
-                        f'\n[bold red]Closing scripts due to heavy processes:'
-                        f'[/bold red] {detected}'
+                    logger.warning(
+                        f"Closing scripts due to heavy processes: {detected}"
                     )
                 else:
-                    print(
-                        f'\n[bold red]Closing scripts due to high RAM usage:'
-                        f'[/bold red] {current_ram}%'
+                    logger.warning(
+                        f'Closing scripts due to high RAM usage: {current_ram}%'
                     )
 
                 self.stop_scripts()
-                print('[yellow]Scripts stopped.[/yellow]')
+                logger.info('Scripts stopped.')
                 script_running = False
             elif (
                 not is_heavy_process_open
                 and not is_ram_critical
                 and not script_running
+                and current_ram < self.ram_safe 
             ):
-                print(
-                    f'\n[bold green]System stable (RAM: {current_ram}%).'
-                    'Starting scripts...[/bold green]'
+                logger.info(
+                    f'System stable (RAM: {current_ram}%). Starting scripts...'
                 )
                 self.start_scripts()
                 script_running = True
@@ -255,8 +245,10 @@ class FortScript:
                 pass
 
             if not self.active_processes and script_running:
-                print(
-                    "[bold red]No valid scripts found to start. FortScript is shutting down.[/bold red]")
+                logger.error(
+                    "No valid scripts found to start. "
+                    "FortScript is shutting down."
+                )
                 break
             time.sleep(5)
 

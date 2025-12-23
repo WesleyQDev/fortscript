@@ -27,7 +27,7 @@ productivity_blockers = [
 app = FortScript(
     projects=development_projects,
     heavy_process=productivity_blockers,
-    ram_threashold=85  # Pause if RAM usage exceeds 85%
+    ram_threshold=90  # Pause if RAM usage exceeds 90%
 )
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import time
 
 import psutil
@@ -51,52 +52,65 @@ class AppsMonitoring:
 class FortScript:
     """Main class to manage scripts and monitor application status."""
 
-    def __init__(self, config_path='config.yaml'):
+    def __init__(
+            self, config_path="fortscript.yaml",
+            projects=None, heavy_process=None,
+            ram_threshold=None):
         """
         Initializes FortScript with the configuration file.
 
         Args:
             config_path (str): The path to the YAML configuration file.
         """
-        self.config = self.load_config(config_path)
-        self.projects = self.config.get('projects') or []
+        self.file_config = self.load_config(config_path)
 
-        self.ram_monitoring = RamMonitoring()
-
-        self.heavy_processes = self.config.get('heavy_processes') or []
-        self.apps_monitoring = AppsMonitoring(self.heavy_processes)
         self.active_processes = []
 
-        self.ram_threshold = self.config.get('ram_threshold', 80)
-        
+        self.projects = projects if projects is not None else (
+            self.file_config.get('projects') or [])
+        self.heavy_processes = heavy_process if heavy_process is not None else (
+            self.file_config.get('heavy_processes') or [])
+        self.ram_threshold = ram_threshold if ram_threshold is not None else (
+            self.file_config.get('ram_threshold', 95))
 
         self.is_windows = os.name == 'nt'
 
+        self.apps_monitoring = AppsMonitoring(self.heavy_processes)
+        self.ram_monitoring = RamMonitoring()
+
     def load_config(self, path):
-        """
-        Loads the configuration from a YAML file.
-
-        Args:
-            path (str): Path to the configuration file.
-
-        Returns:
-            dict: The loaded configuration.
-        """
-        with open(path, 'r') as file:
-            config = yaml.safe_load(file)
-        return config
+        """Loads the configuration from a YAML file. Returns empty dict if file fails."""
+        try:
+            if os.path.exists(path):
+                with open(path, 'r') as file:
+                    return yaml.safe_load(file) or {}
+        except Exception as e:
+            print(f"[yellow]Warning: Could not load {path}: {e}[/yellow]")
+        return {}
 
     def start_scripts(self):
         """Starts all projects defined in the configuration."""
         self.active_processes = []  # Clear the list before starting
-        
+        creation_flags = 0
+        if self.is_windows:
+            creation_flags = subprocess.CREATE_NEW_CONSOLE
+
         for project in self.projects:
-            project_name = project.get('name')
+            project_name = project.get('name', 'Unknown Project')
             script_path = project.get('path')
+
+            if not script_path:
+                print(
+                    f"[yellow]Warning: Project [bold]{project_name}[/bold] "
+                    f"skipped because it has no 'path' defined.[/yellow]"
+                )
+                continue
+
             project_dir = os.path.dirname(script_path)
 
             # Check if the script is Python
             if script_path.endswith('.py'):
+
                 try:
                     if self.is_windows:
                         venv_python = os.path.join(
@@ -109,12 +123,12 @@ class FortScript:
 
                     python_exe = (
                         venv_python if os.path.exists(
-                            venv_python) else 'python'
+                            venv_python) else sys.executable
                     )
 
                     proc = subprocess.Popen(
                         [python_exe, script_path],
-                        creationflags=subprocess.CREATE_NEW_CONSOLE,
+                        creationflags=creation_flags,
                     )
                     self.active_processes.append(proc)
                     print(
@@ -136,7 +150,7 @@ class FortScript:
                     proc = subprocess.Popen(
                         command,
                         cwd=project_dir,
-                        creationflags=subprocess.CREATE_NEW_CONSOLE,
+                        creationflags=creation_flags,
                     )
                     self.active_processes.append(proc)
 
@@ -159,7 +173,7 @@ class FortScript:
                     proc = subprocess.Popen(
                         command,
                         cwd=str(project_dir),
-                        creationflags=subprocess.CREATE_NEW_CONSOLE,
+                        creationflags=creation_flags,
                     )
                     self.active_processes.append(proc)
 
@@ -173,6 +187,7 @@ class FortScript:
                     f"\n[yellow]Warning:[/yellow] The project [bold]{project_name}[/bold] was skipped (invalid extension).\n"
                     f"Try again with a script: [red][.py, .exe][/red] or a Node.js project with a [red]package.json[/red] in the folder."
                 )
+
     def stop_scripts(self):
         """Terminates active scripts and their child processes."""
         print(
@@ -207,18 +222,17 @@ class FortScript:
             current_ram = self.ram_monitoring.get_percent()
             is_ram_critical = current_ram > self.ram_threshold
 
-
             if (is_heavy_process_open or is_ram_critical) and script_running:
                 if is_heavy_process_open:
                     detected = [k for k, v in status_dict.items() if v]
                     print(
                         f'\n[bold red]Closing scripts due to heavy processes:'
-                        '[/bold red]{detected}'
+                        f'[/bold red] {detected}'
                     )
                 else:
                     print(
                         f'\n[bold red]Closing scripts due to high RAM usage:'
-                        '[/bold red] {current_ram}%'
+                        f'[/bold red] {current_ram}%'
                     )
 
                 self.stop_scripts()
@@ -241,7 +255,8 @@ class FortScript:
                 pass
 
             if not self.active_processes and script_running:
-                print("[bold red]No valid scripts found to start. FortScript is shutting down.[/bold red]")
+                print(
+                    "[bold red]No valid scripts found to start. FortScript is shutting down.[/bold red]")
                 break
             time.sleep(5)
 

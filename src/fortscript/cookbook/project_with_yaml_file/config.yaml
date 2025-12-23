@@ -1,0 +1,16 @@
+# FortScript Configuration for Content Creators
+# This file manages background utilities that should stop when gaming starts
+
+projects:
+  - name: "Live Stream Overlay"
+    path: "src/fortscript/cookbook/project_with_yaml_file/overlay_controller.py"
+
+heavy_processes:
+  - name: "AAA Game (Cyberpunk)"
+    process: "cyberpunk2077.exe"
+  - name: "Video Rendering"
+    process: "afterfx.exe"
+  - name: "Browser (Twitch Dashboard)"
+    process: "chrome.exe"
+
+ram_threshold: 92

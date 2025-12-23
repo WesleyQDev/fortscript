@@ -24,7 +24,6 @@ def main():
     header.append(f' v{__version__} by WesleyQDev', style='dim')
     console.print(header)
 
-
     # Path for the global config
     config_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'config.yaml'

@@ -23,14 +23,26 @@ productivity_blockers = [
     {'name': 'Video Editor', 'process': 'premiere.exe'}
 ]
 
-# Initialize FortScript with our custom configuration
+
+def on_pause():
+    print(">>> [Event] Development stack PAUSED. Enjoy your game!")
+
+
+def on_resume():
+    print(">>> [Event] System stable. Returning to development mode...")
+
+
+# Initialize FortScript with our custom configuration and events
 app = FortScript(
     projects=development_projects,
     heavy_process=productivity_blockers,
-    ram_threshold=90  # Pause if RAM usage exceeds 90%
+    ram_threshold=90,  # Pause if RAM usage exceeds 90%
+    ram_safe=80,      # Resume only when RAM falls below 80% (Hysteresis)
+    on_pause=on_pause,
+    on_resume=on_resume
 )
 
 if __name__ == "__main__":
-    print("--- [bold green]FortScript: Developer Productivity Case[/bold green] ---")
+    print("--- FortScript: Developer Productivity Case ---")
     print("Scenario: Managing a local backend stack that pauses during heavy tasks.")
     app.run()

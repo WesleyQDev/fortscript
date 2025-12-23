@@ -6,13 +6,25 @@ from fortscript import FortScript
 base_dir = os.path.dirname(os.path.abspath(__file__))
 config_path = os.path.join(base_dir, "config.yaml")
 
-# Initialize FortScript using the external YAML file
-# This is ideal for users who want to change settings without touching Python code
-app = FortScript(config_path=config_path)
+
+def alert_system():
+    print("📢 [System Alert] Resource usage threshold reached! Pausing overlays.")
+
+
+def welcome_back():
+    print("✅ [System Alert] Resources cleared. Overlays are live again!")
+
+
+# Initialize FortScript using the external YAML file and events
+app = FortScript(
+    config_path=config_path,
+    on_pause=alert_system,
+    on_resume=welcome_back
+)
 
 
 def main():
-    print("--- [bold magenta]FortScript: Content Creator Case[/bold magenta] ---")
+    print("--- FortScript: Content Creator Case ---")
     print(f"Loading external configuration from: {config_path}")
     print("Scenario: Managing streaming overlays that pause during resource-intensive gameplay.")
     app.run()

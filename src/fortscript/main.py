@@ -59,8 +59,10 @@ class FortScript:
             projects=None,
             heavy_process=None,
             ram_threshold=None,
-            ram_safe=None
-            ):
+            ram_safe=None,
+            on_pause=None,
+            on_resume=None
+    ):
         """
         Initializes FortScript with the configuration file.
 
@@ -79,6 +81,9 @@ class FortScript:
             self.file_config.get('ram_threshold', 95))
         self.ram_safe = ram_safe if ram_safe is not None else (
             self.file_config.get('ram_safe', 85))
+
+        self.on_pause = on_pause
+        self.on_resume = on_resume
 
         self.is_windows = os.name == 'nt'
 
@@ -101,6 +106,12 @@ class FortScript:
 
         for project in self.projects:
             self._start_project(project)
+
+        if self.on_resume:
+            try:
+                self.on_resume()
+            except Exception as e:
+                logger.error(f"Error in on_resume callback: {e}")
 
     def _start_project(self, project):
         """Starts a single project based on its configuration."""
@@ -204,6 +215,12 @@ class FortScript:
         self.active_processes = []
         logger.info('All processes have been terminated.')
 
+        if self.on_pause:
+            try:
+                self.on_pause()
+            except Exception as e:
+                logger.error(f"Error in on_pause callback: {e}")
+
     def process_manager(self):
         """Manages scripts based on heavy process activity and RAM usage."""
         script_running = ""
@@ -232,7 +249,7 @@ class FortScript:
                 not is_heavy_process_open
                 and not is_ram_critical
                 and not script_running
-                and current_ram < self.ram_safe 
+                and current_ram < self.ram_safe
             ):
                 logger.info(
                     f'System stable (RAM: {current_ram}%). Starting scripts...'

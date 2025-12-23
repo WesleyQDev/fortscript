@@ -55,14 +55,15 @@ class FortScript:
     """Main class to manage scripts and monitor application status."""
 
     def __init__(
-            self, config_path="fortscript.yaml",
-            projects=None,
-            heavy_process=None,
-            ram_threshold=None,
-            ram_safe=None,
-            on_pause=None,
-            on_resume=None,
-            log_level=None
+        self,
+        config_path='fortscript.yaml',
+        projects=None,
+        heavy_process=None,
+        ram_threshold=None,
+        ram_safe=None,
+        on_pause=None,
+        on_resume=None,
+        log_level=None,
     ):
         """
         Initializes FortScript with the configuration file.
@@ -74,21 +75,36 @@ class FortScript:
 
         self.active_processes = []
 
-        self.projects = projects if projects is not None else (
-            self.file_config.get('projects') or [])
-        self.heavy_processes = heavy_process if heavy_process is not None else (
-            self.file_config.get('heavy_processes') or [])
-        self.ram_threshold = ram_threshold if ram_threshold is not None else (
-            self.file_config.get('ram_threshold', 95))
-        self.ram_safe = ram_safe if ram_safe is not None else (
-            self.file_config.get('ram_safe', 85))
+        self.projects = (
+            projects
+            if projects is not None
+            else (self.file_config.get('projects') or [])
+        )
+        self.heavy_processes = (
+            heavy_process
+            if heavy_process is not None
+            else (self.file_config.get('heavy_processes') or [])
+        )
+        self.ram_threshold = (
+            ram_threshold
+            if ram_threshold is not None
+            else (self.file_config.get('ram_threshold', 95))
+        )
+        self.ram_safe = (
+            ram_safe
+            if ram_safe is not None
+            else (self.file_config.get('ram_safe', 85))
+        )
 
         self.on_pause = on_pause
         self.on_resume = on_resume
 
         # Set log level (Argument > Config > Default INFO)
-        level = log_level if log_level is not None else (
-            self.file_config.get('log_level', 'INFO'))
+        level = (
+            log_level
+            if log_level is not None
+            else (self.file_config.get('log_level', 'INFO'))
+        )
         logger.setLevel(level)
 
         self.is_windows = os.name == 'nt'
@@ -103,7 +119,7 @@ class FortScript:
                 with open(path, 'r') as file:
                     return yaml.safe_load(file) or {}
         except Exception as e:
-            logger.warning(f"Could not load {path}: {e}")
+            logger.warning(f'Could not load {path}: {e}')
         return {}
 
     def start_scripts(self):
@@ -117,7 +133,7 @@ class FortScript:
             try:
                 self.on_resume()
             except Exception as e:
-                logger.error(f"Error in on_resume callback: {e}")
+                logger.error(f'Error in on_resume callback: {e}')
 
     def _start_project(self, project):
         """Starts a single project based on its configuration."""
@@ -126,7 +142,7 @@ class FortScript:
 
         if not script_path:
             logger.warning(
-                f"Project {project_name} "
+                f'Project {project_name} '
                 f"skipped because it has no 'path' defined."
             )
             return
@@ -149,7 +165,8 @@ class FortScript:
                     )
 
                 python_exe = (
-                    venv_python if os.path.exists(venv_python)
+                    venv_python
+                    if os.path.exists(venv_python)
                     else sys.executable
                 )
 
@@ -158,10 +175,10 @@ class FortScript:
                     creationflags=creation_flags,
                 )
                 self.active_processes.append(proc)
-                logger.info(f"Project started: {project_name} ({script_path})")
+                logger.info(f'Project started: {project_name} ({script_path})')
 
             except Exception as e:
-                logger.error(f"Error executing {project_name}: {e}")
+                logger.error(f'Error executing {project_name}: {e}')
 
         elif script_path.endswith('package.json'):
             try:
@@ -175,10 +192,10 @@ class FortScript:
                     creationflags=creation_flags,
                 )
                 self.active_processes.append(proc)
-                logger.info(f"Project: {project_name} started successfully!")
+                logger.info(f'Project: {project_name} started successfully!')
 
             except Exception as e:
-                logger.error(f"Error executing {project_name}: {e}")
+                logger.error(f'Error executing {project_name}: {e}')
 
         # Invalid extension handling
         elif script_path.endswith('.exe') and self.is_windows:
@@ -193,11 +210,11 @@ class FortScript:
                 self.active_processes.append(proc)
 
             except Exception as e:
-                logger.error(f"Error executing {project_name}: {e}")
+                logger.error(f'Error executing {project_name}: {e}')
         else:
             logger.warning(
-                f"The project {project_name} was skipped (invalid extension). "
-                "Try again with a script: [.py, .exe] or a Node.js project."
+                f'The project {project_name} was skipped (invalid extension). '
+                'Try again with a script: [.py, .exe] or a Node.js project.'
             )
 
     def stop_scripts(self):
@@ -225,7 +242,7 @@ class FortScript:
             try:
                 self.on_pause()
             except Exception as e:
-                logger.error(f"Error in on_pause callback: {e}")
+                logger.error(f'Error in on_pause callback: {e}')
 
     def process_manager(self):
         """Manages scripts based on heavy process activity and RAM usage."""
@@ -241,24 +258,27 @@ class FortScript:
 
             # Initial feedback if system is already heavy
             if first_check and (is_heavy_process_open or is_ram_critical):
-                reason = "heavy processes" if is_heavy_process_open else "high RAM"
+                reason = (
+                    'heavy processes' if is_heavy_process_open else 'high RAM'
+                )
                 logger.info(
-                    f"System is busy ({reason}). Waiting for stabilization...")
+                    f'System is busy ({reason}). Waiting for stabilization...'
+                )
                 first_check = False
 
             if (is_heavy_process_open or is_ram_critical) and script_running:
                 if is_heavy_process_open:
                     detected = [k for k, v in status_dict.items() if v]
                     logger.warning(
-                        f"Closing scripts due to heavy processes: {detected}"
+                        f'Closing scripts due to heavy processes: {detected}'
                     )
                 else:
                     logger.warning(
-                        f"Closing scripts due to high RAM usage: {current_ram}%"
+                        f'Closing scripts due to high RAM usage: {current_ram}%'
                     )
 
                 self.stop_scripts()
-                logger.info("Scripts stopped.")
+                logger.info('Scripts stopped.')
                 script_running = False
             elif (
                 not is_heavy_process_open
@@ -267,7 +287,7 @@ class FortScript:
                 and current_ram < self.ram_safe
             ):
                 logger.info(
-                    f"System stable (RAM: {current_ram}%). Starting scripts..."
+                    f'System stable (RAM: {current_ram}%). Starting scripts...'
                 )
                 self.start_scripts()
                 script_running = True
@@ -279,8 +299,8 @@ class FortScript:
 
             if not self.active_processes and script_running:
                 logger.error(
-                    "No valid scripts found to start. "
-                    "FortScript is shutting down."
+                    'No valid scripts found to start. '
+                    'FortScript is shutting down.'
                 )
                 break
             time.sleep(5)

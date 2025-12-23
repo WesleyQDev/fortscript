@@ -20,10 +20,10 @@ def main():
     """Main entry point for the CLI."""
     # Configure logging with Rich
     logging.basicConfig(
-        level="INFO",
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[RichHandler(rich_tracebacks=True, show_path=False)]
+        level='INFO',
+        format='%(message)s',
+        datefmt='[%X]',
+        handlers=[RichHandler(rich_tracebacks=True, show_path=False)],
     )
 
     # Minimalist and elegant header
@@ -36,7 +36,7 @@ def main():
 
     # Path for the global config
     config_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), 'config.yaml'
+        os.path.dirname(os.path.abspath(__file__)), 'fortscript.yaml'
     )
 
     app = FortScript(config_path=config_path)

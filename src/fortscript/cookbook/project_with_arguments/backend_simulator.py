@@ -10,9 +10,13 @@ console = Console()
 
 def simulate_requests():
     """Simulates a developer backend logging API requests."""
-    methods = ["GET", "POST", "PUT", "DELETE"]
-    endpoints = ["/api/v1/users", "/api/v1/auth/login",
-                 "/api/v1/products", "/api/v1/orders"]
+    methods = ['GET', 'POST', 'PUT', 'DELETE']
+    endpoints = [
+        '/api/v1/users',
+        '/api/v1/auth/login',
+        '/api/v1/products',
+        '/api/v1/orders',
+    ]
 
     logs = []
 
@@ -25,11 +29,11 @@ def simulate_requests():
             latency = random.randint(10, 500)
 
             log_entry = {
-                "time": time.strftime("%H:%M:%S"),
-                "method": method,
-                "endpoint": endpoint,
-                "status": status,
-                "latency": f"{latency}ms"
+                'time': time.strftime('%H:%M:%S'),
+                'method': method,
+                'endpoint': endpoint,
+                'status': status,
+                'latency': f'{latency}ms',
             }
 
             logs.append(log_entry)
@@ -38,24 +42,31 @@ def simulate_requests():
 
             # Create a nice UI table
             table = Table(
-                title="[bold blue]Developer Backend Simulator - Service A[/bold blue]")
-            table.add_column("Time", style="dim")
-            table.add_column("Method", style="bold")
-            table.add_column("Endpoint", style="cyan")
+                title='[bold blue]Developer Backend Simulator - Service A[/bold blue]'
+            )
+            table.add_column('Time', style='dim')
+            table.add_column('Method', style='bold')
+            table.add_column('Endpoint', style='cyan')
             table.add_column(
-                "Status", style="green" if status < 400 else "red")
-            table.add_column("Latency", style="magenta")
+                'Status', style='green' if status < 400 else 'red'
+            )
+            table.add_column('Latency', style='magenta')
 
             for log in logs:
-                table.add_row(log["time"], log["method"], log["endpoint"], str(
-                    log["status"]), log["latency"])
+                table.add_row(
+                    log['time'],
+                    log['method'],
+                    log['endpoint'],
+                    str(log['status']),
+                    log['latency'],
+                )
 
             live.update(table)
             time.sleep(random.uniform(0.5, 2.0))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         simulate_requests()
     except KeyboardInterrupt:
-        console.print("\n[yellow]Shutting down Backend Simulator...[/yellow]")
+        console.print('\n[yellow]Shutting down Backend Simulator...[/yellow]')

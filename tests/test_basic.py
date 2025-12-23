@@ -13,4 +13,4 @@ def test_instantiation_without_config():
     import pytest
 
     with pytest.raises(FileNotFoundError):
-        FortScript(config_path="nonexistent.yaml")
+        FortScript(config_path='nonexistent.yaml')

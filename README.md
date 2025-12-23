@@ -65,7 +65,7 @@ pipx install fortscript
 
 ### Prerequisites
 
-- **Python 3.12+**
+- **Python 3.10+**
 - **Node.js** (only if managing JavaScript/TypeScript projects)
 
 ---

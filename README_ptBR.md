@@ -30,7 +30,7 @@ Você já deixou um bot, uma API ou um script rodando em segundo plano enquanto 
 
 **FortScript resolve isso automaticamente.** Ele pausa seus scripts quando você abre um jogo ou aplicativo pesado, e retoma quando você fecha. Simples assim.
 
-**Multiplaforma** FortScript foi desenvolvido para funcionar em qualquer plataforma seja Windows, Linux ou MacOS.
+**Multiplataforma:** O FortScript foi desenvolvido para funcionar em qualquer sistema operacional, seja Windows, Linux ou MacOS.
 
 ### Como funciona
 
@@ -173,7 +173,7 @@ app.run()
 
 > **Dica:** Você pode combinar as duas formas! Argumentos passados no código sobrescrevem os valores do arquivo YAML.
 
-Fortscript está em constante evolução, em próximas versões sera possivel executar projetos de outras linguagens, assim como poder escolher a forma de como o projeto sera iniciado como qual gerenciador de pacotes usar para iniciar o script/projeto.
+**Nota:** O FortScript está em constante evolução. Em próximas versões, será possível executar projetos de outras linguagens, além de escolher o gerenciador de pacotes para iniciar cada script/projeto.
 
 ### Tipos de projeto/script atualmente suportados
 
@@ -199,30 +199,7 @@ app = FortScript()
 app.run()
 ```
 
-### Opção 2: Configuração via argumentos (sem arquivo YAML)
-
-Passe todas as configurações diretamente no código:
-
-```python
-from fortscript import FortScript
-
-app = FortScript(
-    projects=[
-        {"name": "Meu Bot Discord", "path": "./bot/main.py"},
-    ],
-    heavy_process=[
-        {"name": "Valorant", "process": "valorant"},
-        {"name": "League of Legends", "process": "leagueclient"},
-    ],
-    ram_threshold=90,
-    ram_safe=80,
-    log_level="INFO",
-)
-
-app.run()
-```
-
-### Opção 3: Com callbacks de eventos
+### Opção 2: Com callbacks de eventos
 
 Execute funções personalizadas quando os scripts são pausados ou retomados:
 
@@ -246,55 +223,65 @@ app = FortScript(
 app.run()
 ```
 
-### Opção 4: Configuração completa (todos os argumentos)
+### Opção 3: Configuração completa (Python Dinâmico)
 
-Exemplo com todos os parâmetros disponíveis:
+Para manter seu código organizado, você pode separar as listas de projetos e processos em variáveis.
 
 ```python
 from fortscript import FortScript
 
+# 1. Defina seus callbacks
 def notificar_pausa():
     print("⏸️ Scripts pausados!")
 
 def notificar_retomada():
     print("▶️ Scripts retomados!")
 
+# 2. Defina seus projetos
+meus_projetos = [
+    {"name": "Bot Discord", "path": "./bot/main.py"},
+    {"name": "API Express", "path": "./api/package.json"},
+    {"name": "Servidor", "path": "./server/app.exe"},
+]
+
+# 3. Defina os processos pesados
+meus_processos = [
+    {"name": "GTA V", "process": "gta5"},
+    {"name": "Cyberpunk 2077", "process": "cyberpunk2077"},
+    {"name": "Chrome (Pesado)", "process": "chrome"},
+]
+
+# 4. Inicialize o FortScript
 app = FortScript(
-    config_path="fortscript.yaml",           # Arquivo de configuração (opcional)
-    projects=[                                # Lista de projetos
-        {"name": "Bot Discord", "path": "./bot/main.py"},
-        {"name": "API Express", "path": "./api/package.json"},
-        {"name": "Servidor", "path": "./server/app.exe"},
-    ],
-    heavy_process=[                           # Processos pesados
-        {"name": "GTA V", "process": "gta5"},
-        {"name": "Cyberpunk 2077", "process": "cyberpunk2077"},
-    ],
-    ram_threshold=90,                         # Pausar se RAM > 90%
-    ram_safe=80,                              # Retomar se RAM < 80%
-    on_pause=notificar_pausa,                 # Callback ao pausar
-    on_resume=notificar_retomada,             # Callback ao retomar
-    log_level="DEBUG",                        # Nível de log
+    projects=meus_projetos,
+    heavy_process=meus_processos,
+    ram_threshold=90,             # Pausar se RAM > 90%
+    ram_safe=80,                  # Retomar se RAM < 80%
+    on_pause=notificar_pausa,
+    on_resume=notificar_retomada,
+    log_level="DEBUG",
 )
 
 app.run()
 ```
 
-### Opção 5: Via CLI (terminal)
+### Opção 4: Via CLI (terminal)
 
-Ideal para uso pessoal, sem escrever código
+Ideal para uso rápido ou testes básicos.
 
 ```bash
 fort
 ```
 
-> **Nota:** A CLI atualmente executa o FortScript a partir do `src\fortscript\cli\fortscript.yaml` o que não seria o ideal. Em versões futuras as configurações serão guardadas globalmente e comandos adicionais como `fort add` serão adicionados.
+> **Atenção:** Atualmente, a CLI busca as configurações no arquivo interno do pacote (`src/fortscript/cli/fortscript.yaml`), o que limita a personalização local via CLI. Para projetos reais, recomenda-se o uso via script Python (Opções 1 a 3) até que o suporte a configurações locais na CLI seja implementado.
 
 ---
 
 ## Exemplo Prático: Modo Gaming
 
 Imagine que você é um desenvolvedor que roda scripts de trabalho (bots, APIs, automações) durante o dia, mas quer jogar à noite sem que o PC fique travando.
+
+Neste exemplo, usaremos a lista de jogos integrada (`GAMES`) do FortScript para não precisar configurar cada jogo manualmente.
 
 ### Estrutura do projeto
 
@@ -306,147 +293,87 @@ meu_projeto/
 ├── api_local/
 │   ├── node_modules/
 │   └── package.json         # API Express rodando localmente
-├── automacao/
-│   └── backup.exe           # Script de backup automático
-├── fortscript.yaml
-└── modo_gaming.py
+└── modo_gaming.py           # Seu script gerenciador
 ```
 
-### Arquivo `fortscript.yaml`
-
-```yaml
-projects:
-  - name: "Bot Discord"
-    path: "./bot_discord/main.py"
-  - name: "API Local"
-    path: "./api_local/package.json"
-  - name: "Backup Automático"
-    path: "./automacao/backup.exe"
-
-heavy_processes:
-  - name: "GTA V"
-    process: "gta5"
-  - name: "Cyberpunk 2077"
-    process: "cyberpunk2077"
-  - name: "Valorant"
-    process: "valorant"
-  - name: "League of Legends"
-    process: "leagueclient"
-  - name: "CS2"
-    process: "cs2"
-  - name: "Fortnite"
-    process: "fortnite"
-  - name: "Apex Legends"
-    process: "r5apex"
-
-ram_threshold: 85
-ram_safe: 75
-log_level: "INFO"
-```
-
-### Arquivo `modo_gaming.py` (versão completa com todos os argumentos)
+### Arquivo `modo_gaming.py`
 
 ```python
 import os
-from fortscript import FortScript
+from fortscript import FortScript, GAMES
 
-# Caminhos dos projetos
+# Caminhos dos projetos (usando os.path para compatibilidade)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 bot_path = os.path.join(base_dir, "bot_discord", "main.py")
 api_path = os.path.join(base_dir, "api_local", "package.json")
-backup_path = os.path.join(base_dir, "automacao", "backup.exe")
 
-# Projetos que serão gerenciados
+# Lista de projetos para gerenciar
 meus_projetos = [
     {"name": "Bot Discord", "path": bot_path},
     {"name": "API Local", "path": api_path},
-    {"name": "Backup Automático", "path": backup_path},
 ]
 
-# Jogos e aplicativos pesados
-meus_jogos = [
-    {"name": "GTA V", "process": "gta5"},
-    {"name": "Cyberpunk 2077", "process": "cyberpunk2077"},
-    {"name": "Valorant", "process": "valorant"},
-    {"name": "League of Legends", "process": "leagueclient"},
-    {"name": "CS2", "process": "cs2"},
-    {"name": "Fortnite", "process": "fortnite"},
-    {"name": "Apex Legends", "process": "r5apex"},
-    {"name": "Premiere Pro", "process": "premiere"},
-    {"name": "After Effects", "process": "afterfx"},
+# Combinando a lista de jogos padrão com processos personalizados
+# GAMES já inclui GTA, Valorant, CS2, LOL, Fortnite, etc.
+meus_processos_pesados = GAMES + [
+    {"name": "Editor De Vídeo", "process": "premiere"},
+    {"name": "Compilador C++", "process": "cl"}
 ]
-
 
 def ao_pausar():
-    """Executado quando os scripts são pausados."""
     print("=" * 50)
     print("🎮 MODO GAMING ATIVADO!")
     print("Seus scripts foram pausados para liberar recursos.")
-    print("Bom jogo! 🚀")
     print("=" * 50)
-    # Aqui você pode: enviar notificação, webhook Discord, etc.
-
 
 def ao_retomar():
-    """Executado quando os scripts são retomados."""
     print("=" * 50)
-    print("💻 MODO TRABALHO ATIVADO!")
-    print("Jogo fechado. Retomando seus scripts...")
-    print("De volta ao trabalho! 📊")
+    print("💻 MODO TRABALHO - Retomando seus scripts...")
     print("=" * 50)
-    # Aqui você pode: reconectar serviços, enviar log, etc.
 
-
-# Inicializa o FortScript com TODOS os argumentos disponíveis
+# Inicializa o FortScript
 app = FortScript(
-    config_path="fortscript.yaml",    # Arquivo de configuração base (opcional)
-    projects=meus_projetos,           # Lista de projetos para gerenciar
-    heavy_process=meus_jogos,         # Lista de processos pesados
-    ram_threshold=85,                 # Pausar se RAM ultrapassar 85%
-    ram_safe=75,                      # Retomar apenas quando RAM < 75%
-    on_pause=ao_pausar,               # Função callback ao pausar
-    on_resume=ao_retomar,             # Função callback ao retomar
-    log_level="DEBUG",                # Nível de log (DEBUG para ver tudo)
+    projects=meus_projetos,
+    heavy_process=meus_processos_pesados,
+    ram_threshold=85,
+    ram_safe=75,
+    on_pause=ao_pausar,
+    on_resume=ao_retomar,
 )
 
-
 if __name__ == "__main__":
-    print("🎯 FortScript: Modo Gaming")
-    print("Monitorando sistema... Abra um jogo para testar!")
-    print("-" * 50)
+    print("🎯 FortScript: Modo Gaming Iniciado")
     app.run()
 ```
 
 ### Como funciona
 
 1. **Inicie o script:** `python modo_gaming.py`
-2. **Abra qualquer jogo da lista** (GTA V, Valorant, etc.)
+2. **Abra qualquer jogo** (GTA V, Valorant, etc.) ou abra o Premiere.
 3. **FortScript automaticamente:**
-   - Detecta o jogo
-   - Pausa o Bot Discord, API e Backup
-   - Executa a função `ao_pausar()` (mostra mensagem de gaming)
-4. **Feche o jogo**
+   - Detecta o processo.
+   - Pausa o Bot Discord e a API.
+   - Exibe a mensagem de "MODO GAMING".
+4. **Feche o jogo.**
 5. **FortScript automaticamente:**
-   - Detecta que o jogo fechou
-   - Aguarda a RAM estabilizar abaixo de 75%
-   - Retoma todos os scripts
-   - Executa a função `ao_retomar()` (mostra mensagem de trabalho)
+   - Detecta o fechamento.
+   - Aguarda a RAM baixar de 75%.
+   - Retoma todos os scripts.
 
 ---
 
 ## Roadmap
-> Se tiver uma ideia você pode sugerir novas funcionalidades criando uma `issue`
+> Se tiver uma ideia, você pode sugerir novas funcionalidades criando uma `issue`.
 
 ### Biblioteca
 
-- [ ] **Funções customizadas**: Gerenciar funções Python criando treadhs.
-- [ ] **Condições por Projeto** permitir que um projeto específico só pause se um aplicativo específico abrir. Exemplo: "Pausar o script do bot apenas se o Cyberpunk2077 abrir, mas deixar o Bot do Discord rodando".
-- [ ] Tentar fazer um encerramento amigavel do script antes de usar um terminate()
-- [ ] Tratamento de Processos Mortos: Se um script que o FortScript iniciou fechar sozinho (erro ou crash), a biblioteca ainda vai achar que ele está rodando até o próximo ciclo. Seria bom verificar se o processo ainda está "alive" periodicamente.
-- [ ]bstração de Projetos (Refatoração): Atualmente, o 
-start_scripts
- tem um if/elif gigante para detectar o tipo de arquivo. Seria muito mais elegante ter classes separadas: PythonProject, NodeProject, ExeProject, todas herdando de uma classe base Project. Assim, adicionar um novo tipo (como Go ou Docker) seria apenas criar uma nova classe.
-- Type Hinting: Adicione dicas de tipo em todos os métodos para melhorar o intellisense para quem for usar sua biblioteca. Exm: def load_config(self, path: str) -> dict:.
+- [ ] **Funções Customizadas**: Gerenciar funções Python criando threads separadas.
+- [ ] **Condições por Projeto**: Permitir que um projeto específico só pause se um aplicativo específico abrir.
+- [ ] **Encerramento Amigável**: Tentar um encerramento gracioso (SIGINT/CTRL+C) antes de forçar o término do processo.
+- [ ] **Tratamento de Processos Mortos**: Verificar periodicamente se os processos iniciados ainda estão vivos.
+- [ ] **Abstração de Projetos**: Refatorar para classes (`PythonProject`, `NodeProject`) facilitando a adição de novas linguagens.
+- [ ] **Type Hinting**: Melhorar a tipagem em todos os métodos para melhor suporte em IDEs.
+
 ### CLI
 
 - [ ] **System Tray**: Rodar minimizado na bandeja do sistema.
@@ -455,13 +382,13 @@ start_scripts
   - `fort list` - Listar projetos configurados
   - `fort remove <name>` - Remover projeto
 
-
 ---
 
 ## Funcionalidades Atuais
 
 - [x] Pausa automática ao detectar aplicativos pesados
 - [x] Pausa automática por limite de RAM
+- [x] Lista integrada com +150 jogos e apps (`from fortscript import GAMES`)
 - [x] Retomada com histerese (ram_safe vs ram_threshold)
 - [x] Suporte a scripts Python com detecção de `.venv`
 - [x] Suporte a projetos Node.js via `npm run start`

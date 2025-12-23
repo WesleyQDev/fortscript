@@ -1,6 +1,10 @@
+import logging
 import os
 
 from fortscript import FortScript
+
+# Basic logging configuration for the cookbook example
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # Define the absolute path to our backend simulator
 base_dir = os.path.dirname(os.path.abspath(__file__))

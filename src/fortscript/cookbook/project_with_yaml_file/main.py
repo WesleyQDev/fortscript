@@ -1,6 +1,10 @@
+import logging
 import os
 
 from fortscript import FortScript
+
+# Basic logging configuration for the cookbook example
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 # Path to our English configuration file
 base_dir = os.path.dirname(os.path.abspath(__file__))

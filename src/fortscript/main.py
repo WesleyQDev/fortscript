@@ -223,13 +223,22 @@ class FortScript:
 
     def process_manager(self):
         """Manages scripts based on heavy process activity and RAM usage."""
-        script_running = ""
+        script_running = False
+        first_check = True
+
         while True:
             status_dict = self.apps_monitoring.active_process_list()
             is_heavy_process_open = any(status_dict.values())
 
             current_ram = self.ram_monitoring.get_percent()
-            is_ram_critical = current_ram > self.ram_threshold and current_ram
+            is_ram_critical = current_ram > self.ram_threshold
+
+            # Initial feedback if system is already heavy
+            if first_check and (is_heavy_process_open or is_ram_critical):
+                reason = "heavy processes" if is_heavy_process_open else "high RAM"
+                logger.info(
+                    f"System is busy ({reason}). Waiting for stabilization...")
+                first_check = False
 
             if (is_heavy_process_open or is_ram_critical) and script_running:
                 if is_heavy_process_open:
@@ -239,11 +248,11 @@ class FortScript:
                     )
                 else:
                     logger.warning(
-                        f'Closing scripts due to high RAM usage: {current_ram}%'
+                        f"Closing scripts due to high RAM usage: {current_ram}%"
                     )
 
                 self.stop_scripts()
-                logger.info('Scripts stopped.')
+                logger.info("Scripts stopped.")
                 script_running = False
             elif (
                 not is_heavy_process_open
@@ -252,10 +261,11 @@ class FortScript:
                 and current_ram < self.ram_safe
             ):
                 logger.info(
-                    f'System stable (RAM: {current_ram}%). Starting scripts...'
+                    f"System stable (RAM: {current_ram}%). Starting scripts..."
                 )
                 self.start_scripts()
                 script_running = True
+                first_check = False
             elif not is_heavy_process_open:
                 # Optional: showing status even when already running,
                 # or just pass

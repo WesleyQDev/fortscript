@@ -1,8 +1,6 @@
 projects:
   # - name: ProjectA
   #   path: C:\Users\dev\project\main.py
-    - name: Obsidian
-      path: C:\Users\wesle\AppData\Local\Programs\Obsidian\Obsidian.exe2
 
 heavy_processes:
   # - name: Fortnite

@@ -118,9 +118,8 @@ class FortScript:
                     )
                     self.active_processes.append(proc)
                     print(
-                        f"""Project: [bold blue]{project_name}[/bold blue]
-                        Script: [red]{script_path}[/red]
-                        started successfully!"""
+                        f'Name: [bold blue]{project_name}[/bold blue]\n'
+                        f'Path: [red]{script_path}[/red] '
                     )
 
                 except Exception as e:
@@ -200,7 +199,7 @@ class FortScript:
 
     def process_manager(self):
         """Manages scripts based on heavy process activity and RAM usage."""
-        script_running = False
+        script_running = ""
         while True:
             status_dict = self.apps_monitoring.active_process_list()
             is_heavy_process_open = any(status_dict.values())
@@ -213,13 +212,13 @@ class FortScript:
                 if is_heavy_process_open:
                     detected = [k for k, v in status_dict.items() if v]
                     print(
-                        f"""[bold red]Closing scripts due to heavy processes:
-                        [/bold red]{detected}"""
+                        f'\n[bold red]Closing scripts due to heavy processes:'
+                        '[/bold red]{detected}'
                     )
                 else:
                     print(
-                        f"""[bold red]Closing scripts due to high RAM usage:
-                        [/bold red] {current_ram}%"""
+                        f'\n[bold red]Closing scripts due to high RAM usage:'
+                        '[/bold red] {current_ram}%'
                     )
 
                 self.stop_scripts()
@@ -241,8 +240,7 @@ class FortScript:
                 # or just pass
                 pass
 
-            print()
-            if not self.active_processes:
+            if not self.active_processes and script_running:
                 print("[bold red]No valid scripts found to start. FortScript is shutting down.[/bold red]")
                 break
             time.sleep(5)

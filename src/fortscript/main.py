@@ -61,7 +61,8 @@ class FortScript:
             ram_threshold=None,
             ram_safe=None,
             on_pause=None,
-            on_resume=None
+            on_resume=None,
+            log_level=None
     ):
         """
         Initializes FortScript with the configuration file.
@@ -84,6 +85,11 @@ class FortScript:
 
         self.on_pause = on_pause
         self.on_resume = on_resume
+
+        # Set log level (Argument > Config > Default INFO)
+        level = log_level if log_level is not None else (
+            self.file_config.get('log_level', 'INFO'))
+        logger.setLevel(level)
 
         self.is_windows = os.name == 'nt'
 

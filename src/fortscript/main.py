@@ -68,6 +68,9 @@ class FortScript:
         self.active_processes = []
 
         self.ram_threshold = self.config.get('ram_threshold', 80)
+        
+
+        self.is_windows = os.name == 'nt'
 
     def load_config(self, path):
         """
@@ -86,6 +89,7 @@ class FortScript:
     def start_scripts(self):
         """Starts all projects defined in the configuration."""
         self.active_processes = []  # Clear the list before starting
+        
         for project in self.projects:
             project_name = project.get('name')
             script_path = project.get('path')
@@ -94,7 +98,7 @@ class FortScript:
             # Check if the script is Python
             if script_path.endswith('.py'):
                 try:
-                    if os.name == 'nt':
+                    if self.is_windows:
                         venv_python = os.path.join(
                             project_dir, '.venv', 'Scripts', 'python.exe'
                         )
@@ -149,13 +153,27 @@ class FortScript:
                     )
 
             # Invalid extension handling
+            elif script_path.endswith('.exe') and self.is_windows:
+                try:
+                    command = ['cmd.exe', '/c', str(script_path)]
+
+                    proc = subprocess.Popen(
+                        command,
+                        cwd=str(project_dir),
+                        creationflags=subprocess.CREATE_NEW_CONSOLE,
+                    )
+                    self.active_processes.append(proc)
+
+                except Exception as e:
+                    print(
+                        f'[bold red]Error executing {project_name}:[/bold red]'
+                        f'{e}'
+                    )
             else:
                 print(
-                    f'[yellow]Warning:[/yellow] The project {project_name}'
-                    'was skipped (invalid extension).'
-                    '\n Try again with a script:[red] [.py, .js, .ts or .exe]'
+                    f"\n[yellow]Warning:[/yellow] The project [bold]{project_name}[/bold] was skipped (invalid extension).\n"
+                    f"Try again with a script: [red][.py, .exe][/red] or a Node.js project with a [red]package.json[/red] in the folder."
                 )
-
     def stop_scripts(self):
         """Terminates active scripts and their child processes."""
         print(
@@ -190,6 +208,7 @@ class FortScript:
             current_ram = self.ram_monitoring.get_percent()
             is_ram_critical = current_ram > self.ram_threshold
 
+
             if (is_heavy_process_open or is_ram_critical) and script_running:
                 if is_heavy_process_open:
                     detected = [k for k, v in status_dict.items() if v]
@@ -212,8 +231,8 @@ class FortScript:
                 and not script_running
             ):
                 print(
-                    f"""[bold green]System stable (RAM: {current_ram}%).
-                    Restarting scripts...[/bold green]"""
+                    f'\n[bold green]System stable (RAM: {current_ram}%).'
+                    'Starting scripts...[/bold green]'
                 )
                 self.start_scripts()
                 script_running = True
@@ -222,9 +241,12 @@ class FortScript:
                 # or just pass
                 pass
 
+            print()
+            if not self.active_processes:
+                print("[bold red]No valid scripts found to start. FortScript is shutting down.[/bold red]")
+                break
             time.sleep(5)
 
     def run(self):
         """Runs the main application loop."""
-        print('Running...')
         self.process_manager()

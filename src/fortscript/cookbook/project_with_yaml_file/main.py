@@ -30,7 +30,7 @@ app = FortScript(
 def main():
     print("--- FortScript: Content Creator Case ---")
     print(f"Loading external configuration from: {config_path}")
-    print("Scenario: Managing streaming overlays that pause during resource-intensive gameplay.")
+    print("Scenario: Managing streaming overlays with settings (and log level) defined in YAML.")
     app.run()
 
 

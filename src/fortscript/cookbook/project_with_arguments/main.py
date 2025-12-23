@@ -4,7 +4,7 @@ import os
 from fortscript import FortScript
 
 # Basic logging configuration for the cookbook example
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+logging.basicConfig(format="%(message)s")
 
 # Define the absolute path to our backend simulator
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -43,7 +43,8 @@ app = FortScript(
     ram_threshold=90,  # Pause if RAM usage exceeds 90%
     ram_safe=80,      # Resume only when RAM falls below 80% (Hysteresis)
     on_pause=on_pause,
-    on_resume=on_resume
+    on_resume=on_resume,
+    log_level="DEBUG"  # Show detailed logs for debugging
 )
 
 if __name__ == "__main__":

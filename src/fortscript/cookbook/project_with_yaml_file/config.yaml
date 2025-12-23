@@ -14,3 +14,4 @@ heavy_processes:
     process: "chrome.exe"
 
 ram_threshold: 92
+log_level: "INFO"

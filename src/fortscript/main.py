@@ -58,13 +58,14 @@ class FortScript:
     def __init__(
         self,
         config_path: str ='fortscript.yaml',
-        projects: list[str] | None = None,
-        heavy_process: list | None = None,
+        projects: list[dict[str,str]] | None = None,
+        heavy_process: list[dict[str,str]] | None = None,
         ram_threshold: int | None = None,
         ram_safe: int | None = None,
         on_pause: Callable | None = None,
         on_resume: Callable | None = None,
         log_level: str | int | None = None,
+        new_console: bool = True,
     ):
         """
         Initializes FortScript with the configuration file.
@@ -72,6 +73,7 @@ class FortScript:
         Args:
             config_path (str): The path to the YAML configuration file.
         """
+        self.new_console = new_console
         self.file_config = self.load_config(config_path)
 
         self.active_processes = []
@@ -150,7 +152,7 @@ class FortScript:
 
         project_dir = os.path.dirname(script_path)
         creation_flags = 0
-        if self.is_windows:
+        if self.is_windows and self.new_console:
             creation_flags = subprocess.CREATE_NEW_CONSOLE
 
         # Check if the script is Python

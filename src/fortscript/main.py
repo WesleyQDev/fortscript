@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import time
+from typing import Callable
 
 import psutil
 import yaml
@@ -21,7 +22,7 @@ class RamMonitoring:
 class AppsMonitoring:
     """Monitors the opening of resource-heavy applications."""
 
-    def __init__(self, heavy_processes_list):
+    def __init__(self, heavy_processes_list: list):
         """
         Initializes the application monitoring with a list of heavy processes.
 
@@ -56,14 +57,14 @@ class FortScript:
 
     def __init__(
         self,
-        config_path='fortscript.yaml',
-        projects=None,
-        heavy_process=None,
-        ram_threshold=None,
-        ram_safe=None,
-        on_pause=None,
-        on_resume=None,
-        log_level=None,
+        config_path: str ='fortscript.yaml',
+        projects: list[str] | None = None,
+        heavy_process: list | None = None,
+        ram_threshold: int | None = None,
+        ram_safe: int | None = None,
+        on_pause: Callable | None = None,
+        on_resume: Callable | None = None,
+        log_level: str | int | None = None,
     ):
         """
         Initializes FortScript with the configuration file.

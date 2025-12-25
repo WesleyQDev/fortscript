@@ -373,7 +373,8 @@ if __name__ == "__main__":
 - [ ] **Tratamento de Processos Mortos**: Verificar periodicamente se os processos iniciados ainda estão vivos.
 - [ ] **Abstração de Projetos**: Refatorar para classes (`PythonProject`, `NodeProject`) facilitando a adição de novas linguagens.
 - [ ] **Type Hinting**: Melhorar a tipagem em todos os métodos para melhor suporte em IDEs.
-
+- [ ] Arrumar bugs relacionado a path, atualmente se adicionar um script python e ele não estiver na raiz do projeto o venv não sera executado, fortscript tenta executar com python padrão, mas da erro por não possuir os imports e a janela do terminal se encerra
+- [ ] Adicionar opção de ativar ou desativar as janelas que aparecem dos scripts
 ### CLI
 
 - [ ] **System Tray**: Rodar minimizado na bandeja do sistema.

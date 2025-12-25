@@ -4,7 +4,7 @@ import sys
 
 # Ensure we can import fortscript from source
 current_dir = os.path.dirname(os.path.abspath(__file__))
-src_path = os.path.abspath(os.path.join(current_dir, "../../../"))
+src_path = os.path.abspath(os.path.join(current_dir, '../../../'))
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
@@ -22,11 +22,14 @@ development_projects = [
     {'name': 'Backend API Simulator', 'path': backend_path}
 ]
 
+
 def on_pause():
     print('>>> [Event] Game detected! Development stack PAUSED.')
 
+
 def on_resume():
     print('>>> [Event] No games running. Resuming development stack...')
+
 
 # Initialize FortScript utilizing the imported GAMES list
 # This demonstrates how to use the built-in list of heavy processes
@@ -44,17 +47,19 @@ if __name__ == '__main__':
     print('--- FortScript: Built-in Games List Example ---')
     print('This example uses the pre-defined "GAMES" list from the library.')
     print(f'Loaded {len(GAMES)} game definitions automatically.')
-    
+
     # We will not call app.run() here to avoid blocking the CI/Interactive session indefinitely
-    # but we will simulate the check to prove it works. 
-    
-    print("\n--- Verifying Configuration ---")
-    print(f"Projects configured: {len(app.projects)}")
-    print(f"Heavy processes monitored: {len(app.heavy_processes)}")
-    
+    # but we will simulate the check to prove it works.
+
+    print('\n--- Verifying Configuration ---')
+    print(f'Projects configured: {len(app.projects)}')
+    print(f'Heavy processes monitored: {len(app.heavy_processes)}')
+
     # Check if the first game in the list is correctly monitored
     first_game = GAMES[0]['name']
-    print(f"First monitored game: {first_game}")
-    
-    print("\n✅ Setup complete. To run the full loop, uncomment 'app.run()' in the code.")
+    print(f'First monitored game: {first_game}')
+
+    print(
+        "\n✅ Setup complete. To run the full loop, uncomment 'app.run()' in the code."
+    )
     app.run()

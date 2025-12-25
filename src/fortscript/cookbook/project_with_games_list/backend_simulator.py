@@ -1,6 +1,7 @@
 import random
 import time
 
+
 # Minimalist simulator without external dependencies (rich) for stability in this test
 def simulate_requests():
     """Simulates a developer backend logging API requests."""
@@ -11,8 +12,8 @@ def simulate_requests():
         '/api/v1/products',
         '/api/v1/orders',
     ]
-    
-    print("Backend Simulator Started. Press Ctrl+C to stop.")
+
+    print('Backend Simulator Started. Press Ctrl+C to stop.')
 
     while True:
         method = random.choice(methods)
@@ -21,8 +22,9 @@ def simulate_requests():
         latency = random.randint(10, 500)
         timestamp = time.strftime('%H:%M:%S')
 
-        print(f"[{timestamp}] {method} {endpoint} -> {status} ({latency}ms)")
+        print(f'[{timestamp}] {method} {endpoint} -> {status} ({latency}ms)')
         time.sleep(random.uniform(0.5, 2.0))
+
 
 if __name__ == '__main__':
     try:

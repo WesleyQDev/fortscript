@@ -57,9 +57,9 @@ class FortScript:
 
     def __init__(
         self,
-        config_path: str ='fortscript.yaml',
-        projects: list[dict[str,str]] | None = None,
-        heavy_process: list[dict[str,str]] | None = None,
+        config_path: str = 'fortscript.yaml',
+        projects: list[dict[str, str]] | None = None,
+        heavy_process: list[dict[str, str]] | None = None,
         ram_threshold: int | None = None,
         ram_safe: int | None = None,
         on_pause: Callable | None = None,
@@ -68,10 +68,18 @@ class FortScript:
         new_console: bool = True,
     ):
         """
-        Initializes FortScript with the configuration file.
+        Initializes FortScript with the configuration file and monitoring parameters.
 
         Args:
             config_path (str): The path to the YAML configuration file.
+            projects (list[dict[str, str]], optional): List of project definitions to be managed.
+            heavy_process (list[dict[str, str]], optional): List of processes that trigger resource saving.
+            ram_threshold (int, optional): RAM usage percentage that triggers a pause in scripts.
+            ram_safe (int, optional): RAM usage percentage considered safe to resume execution.
+            on_pause (Callable, optional): Callback function to execute when scripts are paused.
+            on_resume (Callable, optional): Callback function to execute when scripts are resumed.
+            log_level (str | int, optional): Severity level for logging (e.g., 'INFO', 'DEBUG').
+            new_console (bool): If True, launches scripts in a separate console window.
         """
         self.new_console = new_console
         self.file_config = self.load_config(config_path)

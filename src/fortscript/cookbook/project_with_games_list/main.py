@@ -1,3 +1,4 @@
+from fortscript import GAMES, Callbacks, FortScript, RamConfig
 import logging
 import os
 import sys
@@ -8,7 +9,6 @@ src_path = os.path.abspath(os.path.join(current_dir, '../../../'))
 if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
-from fortscript import FortScript, GAMES
 
 # Basic logging configuration
 logging.basicConfig(format='%(message)s')
@@ -36,10 +36,11 @@ def on_resume():
 app = FortScript(
     projects=development_projects,
     heavy_process=GAMES,  # Using the imported list directly
-    ram_threshold=95,
-    ram_safe=85,
-    on_pause=on_pause,
-    on_resume=on_resume,
+    ram_config=RamConfig(threshold=95, safe=85),
+    callbacks=Callbacks(
+        on_pause=on_pause,
+        on_resume=on_resume,
+    ),
     log_level='DEBUG',
 )
 
@@ -48,7 +49,8 @@ if __name__ == '__main__':
     print('This example uses the pre-defined "GAMES" list from the library.')
     print(f'Loaded {len(GAMES)} game definitions automatically.')
 
-    # We will not call app.run() here to avoid blocking the CI/Interactive session indefinitely
+    # We will not call app.run() here to avoid blocking
+    # the CI/Interactive session indefinitely
     # but we will simulate the check to prove it works.
 
     print('\n--- Verifying Configuration ---')
@@ -59,7 +61,6 @@ if __name__ == '__main__':
     first_game = GAMES[0]['name']
     print(f'First monitored game: {first_game}')
 
-    print(
-        "\n✅ Setup complete. To run the full loop, uncomment 'app.run()' in the code."
-    )
+    print('\n✅ Setup complete. '
+          "To run the full loop, uncomment 'app.run()' in the code.")
     app.run()

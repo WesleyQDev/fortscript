@@ -1,4 +1,4 @@
-from .main import FortScript as FortScript
-from .games import GAMES as GAMES
+from .main import FortScript, RamConfig
+from .games import GAMES
 
-__all__ = ['FortScript', 'GAMES']
+__all__ = ['FortScript', 'RamConfig', 'GAMES']

@@ -3,7 +3,8 @@ import os
 import subprocess
 import sys
 import time
-from typing import Callable
+from dataclasses import dataclass
+from typing import Any, Callable, TypedDict
 
 import psutil
 import yaml
@@ -11,10 +12,20 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
+class ProjectConfig(TypedDict):
+    name: str
+    path: str
+
+
+class HeavyProcessConfig(TypedDict):
+    name: str
+    process: str
+
+
 class RamMonitoring:
     """Monitors RAM consumption."""
 
-    def get_percent(self):
+    def get_percent(self) -> float:
         """Returns the current RAM usage percentage."""
         return psutil.virtual_memory().percent
 
@@ -22,17 +33,17 @@ class RamMonitoring:
 class AppsMonitoring:
     """Monitors the opening of resource-heavy applications."""
 
-    def __init__(self, heavy_processes_list: list):
+    def __init__(self, heavy_processes_list: list[HeavyProcessConfig]):
         """
         Initializes the application monitoring with a list of heavy processes.
 
         Args:
-            heavy_processes_list (list): A list of dictionaries containing
-                process info.
+            heavy_processes_list (list[HeavyProcessConfig]): A list of
+                dictionaries containing process info.
         """
         self.heavy_processes_list = heavy_processes_list
 
-    def active_process_list(self):
+    def active_process_list(self) -> dict[str, bool]:
         """
         Check which heavy processes from the list are currently running.
 
@@ -43,7 +54,7 @@ class AppsMonitoring:
         status = {item['name']: False for item in self.heavy_processes_list}
         for proc in psutil.process_iter(['name']):
             try:
-                proc_name = proc.info['name'].lower()
+                proc_name = proc.info.get('name', '').lower()
                 for item in self.heavy_processes_list:
                     if item['process'].lower() in proc_name:
                         status[item['name']] = True
@@ -52,18 +63,34 @@ class AppsMonitoring:
         return status
 
 
+@dataclass
+class RamConfig:
+    threshold: int = 95
+    safe: int = 85
+
+    def __post_init__(self):
+        if self.safe >= self.threshold:
+            self.safe = max(0, self.threshold - 10)
+
+
+@dataclass
+class Callbacks:
+    """Callback functions for script events."""
+
+    on_pause: Callable | None = None
+    on_resume: Callable | None = None
+
+
 class FortScript:
     """Main class to manage scripts and monitor application status."""
 
     def __init__(
         self,
         config_path: str = 'fortscript.yaml',
-        projects: list[dict[str, str]] | None = None,
-        heavy_process: list[dict[str, str]] | None = None,
-        ram_threshold: int | None = None,
-        ram_safe: int | None = None,
-        on_pause: Callable | None = None,
-        on_resume: Callable | None = None,
+        projects: list[ProjectConfig] | None = None,
+        heavy_process: list[HeavyProcessConfig] | None = None,
+        ram_config: RamConfig | None = None,
+        callbacks: Callbacks | None = None,
         log_level: str | int | None = None,
         new_console: bool = True,
     ):
@@ -72,43 +99,39 @@ class FortScript:
 
         Args:
             config_path (str): The path to the YAML configuration file.
-            projects (list[dict[str, str]], optional): List of project definitions to be managed.
-            heavy_process (list[dict[str, str]], optional): List of processes that trigger resource saving.
-            ram_threshold (int, optional): RAM usage percentage that triggers a pause in scripts.
-            ram_safe (int, optional): RAM usage percentage considered safe to resume execution.
-            on_pause (Callable, optional): Callback function to execute when scripts are paused.
-            on_resume (Callable, optional): Callback function to execute when scripts are resumed.
-            log_level (str | int, optional): Severity level for logging (e.g., 'INFO', 'DEBUG').
-            new_console (bool): If True, launches scripts in a separate console window.
+            projects (list[ProjectConfig], optional): List of project
+                definitions to be managed.
+            heavy_process (list[HeavyProcessConfig], optional): List of
+                processes that trigger resource saving.
+            ram_config (RamConfig, optional): RAM usage configuration.
+            callbacks (Callbacks, optional): Callback functions for events.
+            log_level (str | int, optional): Severity level for logging.
+            new_console (bool): If True, launches scripts in a separate console.
         """
         self.new_console = new_console
         self.file_config = self.load_config(config_path)
 
-        self.active_processes = []
+        self.active_processes: list[subprocess.Popen] = []
 
-        self.projects = (
+        self.projects: list[ProjectConfig] = (
             projects
             if projects is not None
-            else (self.file_config.get('projects') or [])
+            else self.file_config.get('projects', [])
         )
-        self.heavy_processes = (
+        self.heavy_processes: list[HeavyProcessConfig] = (
             heavy_process
             if heavy_process is not None
             else (self.file_config.get('heavy_processes') or [])
         )
-        self.ram_threshold = (
-            ram_threshold
-            if ram_threshold is not None
-            else (self.file_config.get('ram_threshold', 95))
-        )
-        self.ram_safe = (
-            ram_safe
-            if ram_safe is not None
-            else (self.file_config.get('ram_safe', 85))
-        )
+        if ram_config is None:
+            self.ram_config = RamConfig(
+                threshold=self.file_config.get('ram_threshold', 95),
+                safe=self.file_config.get('ram_safe', 85)
+            )
+        else:
+            self.ram_config = ram_config
 
-        self.on_pause = on_pause
-        self.on_resume = on_resume
+        self.callbacks = callbacks or Callbacks()
 
         # Set log level (Argument > Config > Default INFO)
         level = (
@@ -123,7 +146,7 @@ class FortScript:
         self.apps_monitoring = AppsMonitoring(self.heavy_processes)
         self.ram_monitoring = RamMonitoring()
 
-    def load_config(self, path):
+    def load_config(self, path: str) -> dict[str, Any]:
         """Loads the configuration from a YAML file. Returns empty dict if file fails."""
         try:
             if os.path.exists(path):
@@ -133,20 +156,20 @@ class FortScript:
             logger.warning(f'Could not load {path}: {e}')
         return {}
 
-    def start_scripts(self):
+    def start_scripts(self) -> None:
         """Starts all projects defined in the configuration."""
         self.active_processes = []  # Clear the list before starting
 
         for project in self.projects:
             self._start_project(project)
 
-        if self.on_resume:
+        if self.callbacks.on_resume:
             try:
-                self.on_resume()
+                self.callbacks.on_resume()
             except Exception as e:
                 logger.error(f'Error in on_resume callback: {e}')
 
-    def _start_project(self, project):
+    def _start_project(self, project: ProjectConfig) -> None:
         """Starts a single project based on its configuration."""
         project_name = project.get('name', 'Unknown Project')
         script_path = project.get('path')
@@ -228,7 +251,7 @@ class FortScript:
                 'Try again with a script: [.py, .exe] or a Node.js project.'
             )
 
-    def stop_scripts(self):
+    def stop_scripts(self) -> None:
         """Terminates active scripts and their child processes."""
         logger.info('Closing active scripts and their child processes...')
         for proc in self.active_processes:
@@ -249,13 +272,13 @@ class FortScript:
         self.active_processes = []
         logger.info('All processes have been terminated.')
 
-        if self.on_pause:
+        if self.callbacks.on_pause:
             try:
-                self.on_pause()
+                self.callbacks.on_pause()
             except Exception as e:
                 logger.error(f'Error in on_pause callback: {e}')
 
-    def process_manager(self):
+    def process_manager(self) -> None:
         """Manages scripts based on heavy process activity and RAM usage."""
         script_running = False
         first_check = True
@@ -265,7 +288,7 @@ class FortScript:
             is_heavy_process_open = any(status_dict.values())
 
             current_ram = self.ram_monitoring.get_percent()
-            is_ram_critical = current_ram > self.ram_threshold
+            is_ram_critical = current_ram > self.ram_config.safe
 
             # Initial feedback if system is already heavy
             if first_check and (is_heavy_process_open or is_ram_critical):
@@ -285,7 +308,8 @@ class FortScript:
                     )
                 else:
                     logger.warning(
-                        f'Closing scripts due to high RAM usage: {current_ram}%'
+                        'Closing scripts due to high RAM usage:'
+                        f'{current_ram}%'
                     )
 
                 self.stop_scripts()
@@ -295,7 +319,7 @@ class FortScript:
                 not is_heavy_process_open
                 and not is_ram_critical
                 and not script_running
-                and current_ram < self.ram_safe
+                and current_ram < self.ram_config.safe
             ):
                 logger.info(
                     f'System stable (RAM: {current_ram}%). Starting scripts...'
@@ -316,6 +340,6 @@ class FortScript:
                 break
             time.sleep(5)
 
-    def run(self):
+    def run(self) -> None:
         """Runs the main application loop."""
         self.process_manager()

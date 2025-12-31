@@ -1,7 +1,7 @@
 import logging
 import os
 
-from fortscript import FortScript
+from fortscript import Callbacks, FortScript, RamConfig
 
 # Basic logging configuration for the cookbook example
 logging.basicConfig(format='%(message)s')
@@ -33,14 +33,20 @@ def on_resume():
     print('>>> [Event] System stable. Returning to development mode...')
 
 
+ram = RamConfig(
+    threshold=90,  # Pause if RAM usage exceeds 90%
+    safe=80,  # Resume only when RAM falls below 80% (Hysteresis)
+)
+
 # Initialize FortScript with our custom configuration and events
 app = FortScript(
     projects=development_projects,
     heavy_process=productivity_blockers,
-    ram_threshold=90,  # Pause if RAM usage exceeds 90%
-    ram_safe=80,  # Resume only when RAM falls below 80% (Hysteresis)
-    on_pause=on_pause,
-    on_resume=on_resume,
+    ram_config=ram,
+    callbacks=Callbacks(
+        on_pause=on_pause,
+        on_resume=on_resume,
+    ),
     log_level='DEBUG',  # Show detailed logs for debugging
 )
 

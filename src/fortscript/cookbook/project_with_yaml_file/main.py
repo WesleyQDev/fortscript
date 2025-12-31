@@ -1,7 +1,7 @@
 import logging
 import os
 
-from fortscript import FortScript
+from fortscript import Callbacks, FortScript
 
 # Basic logging configuration for the cookbook example
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -23,7 +23,8 @@ def welcome_back():
 
 # Initialize FortScript using the external YAML file and events
 app = FortScript(
-    config_path=config_path, on_pause=alert_system, on_resume=welcome_back
+    config_path=config_path,
+    callbacks=Callbacks(on_pause=alert_system, on_resume=welcome_back),
 )
 
 

@@ -138,7 +138,7 @@ log_level: "INFO"
 You can pass all configurations directly in Python code without needing a YAML file:
 
 ```python
-from fortscript import FortScript
+from fortscript import FortScript, RamConfig
 
 app = FortScript(
     projects=[
@@ -149,8 +149,7 @@ app = FortScript(
         {"name": "GTA V", "process": "gta5"},
         {"name": "OBS Studio", "process": "obs64"},
     ],
-    ram_threshold=90,
-    ram_safe=80,
+    ram_config=RamConfig(threshold=90, safe=80),
     log_level="INFO",
 )
 
@@ -188,7 +187,7 @@ app.run()
 Run custom functions when scripts are paused or resumed:
 
 ```python
-from fortscript import FortScript
+from fortscript import FortScript, Callbacks
 
 def when_paused():
     print("🎮 Gaming mode active! Scripts paused.")
@@ -198,8 +197,10 @@ def when_resumed():
 
 app = FortScript(
     config_path="fortscript.yaml",
-    on_pause=when_paused,
-    on_resume=when_resumed,
+    callbacks=Callbacks(
+        on_pause=when_paused,
+        on_resume=when_resumed,
+    )
 )
 
 app.run()
@@ -210,7 +211,7 @@ app.run()
 To keep your code organized, you can separate project and process lists into variables.
 
 ```python
-from fortscript import FortScript
+from fortscript import FortScript, RamConfig, Callbacks
 
 # 1. Define your callbacks
 def notify_pause():
@@ -237,10 +238,11 @@ my_processes = [
 app = FortScript(
     projects=my_projects,
     heavy_process=my_processes,
-    ram_threshold=90,
-    ram_safe=80,
-    on_pause=notify_pause,
-    on_resume=notify_resume,
+    ram_config=RamConfig(threshold=90, safe=80),
+    callbacks=Callbacks(
+        on_pause=notify_pause,
+        on_resume=notify_resume
+    ),
     log_level="DEBUG",
 )
 
@@ -316,10 +318,11 @@ def on_resume():
 app = FortScript(
     projects=my_projects,
     heavy_process=my_heavy_processes,
-    ram_threshold=85,
-    ram_safe=75,
-    on_pause=on_pause,
-    on_resume=on_resume,
+    ram_config=RamConfig(threshold=85, safe=75),
+    callbacks=Callbacks(
+        on_pause=on_pause,
+        on_resume=on_resume,
+    ),
 )
 
 if __name__ == "__main__":
@@ -339,7 +342,7 @@ if __name__ == "__main__":
 - [ ] **Graceful Shutdown**: Try a graceful shutdown (SIGINT/CTRL+C) before forcing process termination.
 - [ ] **Dead Process Handling**: Periodically check if started processes are still alive.
 - [ ] **Project Abstraction**: Refactor into classes (`PythonProject`, `NodeProject`) to easily add new languages.
-- [ ] **Type Hinting**: Improve typing across all methods for better IDE support.
+- [x] **Type Hinting**: Improve typing across all methods for better IDE support.
 
 ### CLI
 

@@ -152,7 +152,7 @@ log_level: "INFO"
 Você pode passar todas as configurações diretamente no código Python, sem precisar de arquivo YAML:
 
 ```python
-from fortscript import FortScript
+from fortscript import FortScript, RamConfig
 
 app = FortScript(
     projects=[
@@ -163,8 +163,7 @@ app = FortScript(
         {"name": "GTA V", "process": "gta5"},
         {"name": "OBS Studio", "process": "obs64"},
     ],
-    ram_threshold=90,
-    ram_safe=80,
+    ram_config=RamConfig(threshold=90, safe=80),
     log_level="INFO",
 )
 
@@ -204,7 +203,7 @@ app.run()
 Execute funções personalizadas quando os scripts são pausados ou retomados:
 
 ```python
-from fortscript import FortScript
+from fortscript import FortScript, Callbacks
 
 def quando_pausar():
     print("🎮 Modo gaming ativado! Scripts pausados.")
@@ -216,8 +215,10 @@ def quando_retomar():
 
 app = FortScript(
     config_path="fortscript.yaml",
-    on_pause=quando_pausar,    # Função executada ao pausar
-    on_resume=quando_retomar,  # Função executada ao retomar
+    callbacks=Callbacks(
+        on_pause=quando_pausar,    # Função executada ao pausar
+        on_resume=quando_retomar,  # Função executada ao retomar
+    )
 )
 
 app.run()
@@ -228,7 +229,7 @@ app.run()
 Para manter seu código organizado, você pode separar as listas de projetos e processos em variáveis.
 
 ```python
-from fortscript import FortScript
+from fortscript import FortScript, RamConfig, Callbacks
 
 # 1. Defina seus callbacks
 def notificar_pausa():
@@ -255,10 +256,11 @@ meus_processos = [
 app = FortScript(
     projects=meus_projetos,
     heavy_process=meus_processos,
-    ram_threshold=90,             # Pausar se RAM > 90%
-    ram_safe=80,                  # Retomar se RAM < 80%
-    on_pause=notificar_pausa,
-    on_resume=notificar_retomada,
+    ram_config=RamConfig(threshold=90, safe=80),
+    callbacks=Callbacks(
+        on_pause=notificar_pausa,
+        on_resume=notificar_retomada
+    ),
     log_level="DEBUG",
 )
 
@@ -335,10 +337,11 @@ def ao_retomar():
 app = FortScript(
     projects=meus_projetos,
     heavy_process=meus_processos_pesados,
-    ram_threshold=85,
-    ram_safe=75,
-    on_pause=ao_pausar,
-    on_resume=ao_retomar,
+    ram_config=RamConfig(threshold=85, safe=75),
+    callbacks=Callbacks(
+        on_pause=ao_pausar,
+        on_resume=ao_retomar,
+    ),
 )
 
 if __name__ == "__main__":
@@ -372,7 +375,6 @@ if __name__ == "__main__":
 - [ ] **Encerramento Amigável**: Tentar um encerramento gracioso (SIGINT/CTRL+C) antes de forçar o término do processo.
 - [ ] **Tratamento de Processos Mortos**: Verificar periodicamente se os processos iniciados ainda estão vivos.
 - [ ] **Abstração de Projetos**: Refatorar para classes (`PythonProject`, `NodeProject`) facilitando a adição de novas linguagens.
-- [ ] **Type Hinting**: Melhorar a tipagem em todos os métodos para melhor suporte em IDEs.
 - [ ] Arrumar bugs relacionado a path, atualmente se adicionar um script python e ele não estiver na raiz do projeto o venv não sera executado, fortscript tenta executar com python padrão, mas da erro por não possuir os imports e a janela do terminal se encerra
 
 ### CLI
@@ -400,6 +402,7 @@ if __name__ == "__main__":
 - [x] Níveis de log configuráveis (DEBUG, INFO, WARNING, ERROR)
 - [x] Encerramento seguro de processos (tree-kill)
 - [x] Adicionar opção de ativar ou desativar as janelas que aparecem dos scripts (Apenas em OS Windows)
+- [x] Type Hinting: Melhorar a tipagem em todos os métodos para melhor suporte em IDEs.
 
 ---
 

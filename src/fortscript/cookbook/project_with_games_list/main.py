@@ -18,11 +18,12 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 backend_path = os.path.join(base_dir, 'backend_simulator.py')
 
 # Configuration for a typical developer development stack
-development_projects = [
+projects = [
     {'name': 'Backend API Simulator', 'path': backend_path}
 ]
 
 
+# Callback functions for game detection events
 def on_pause():
     print('>>> [Event] Game detected! Development stack PAUSED.')
 
@@ -31,16 +32,26 @@ def on_resume():
     print('>>> [Event] No games running. Resuming development stack...')
 
 
+# RAM configuration with hysteresis to prevent constant toggling
+ram_config = RamConfig(
+    threshold=95,  # Pause if RAM usage exceeds 95%
+    safe=85,       # Resume only when RAM falls below 85%
+)
+
+# Callback configuration
+callbacks = Callbacks(
+    on_pause=on_pause,
+    on_resume=on_resume,
+)
+
+
 # Initialize FortScript utilizing the imported GAMES list
 # This demonstrates how to use the built-in list of heavy processes
 app = FortScript(
-    projects=development_projects,
+    projects=projects,
     heavy_process=GAMES,  # Using the imported list directly
-    ram_config=RamConfig(threshold=95, safe=85),
-    callbacks=Callbacks(
-        on_pause=on_pause,
-        on_resume=on_resume,
-    ),
+    ram_config=ram_config,
+    callbacks=callbacks,
     log_level='DEBUG',
 )
 

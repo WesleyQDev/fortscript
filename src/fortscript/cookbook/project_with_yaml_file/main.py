@@ -21,10 +21,16 @@ def welcome_back():
     print('✅ [System Alert] Resources cleared. Overlays are live again!')
 
 
+# Callback configuration
+callbacks = Callbacks(
+    on_pause=alert_system,
+    on_resume=welcome_back,
+)
+
 # Initialize FortScript using the external YAML file and events
 app = FortScript(
     config_path=config_path,
-    callbacks=Callbacks(on_pause=alert_system, on_resume=welcome_back),
+    callbacks=callbacks,
 )
 
 

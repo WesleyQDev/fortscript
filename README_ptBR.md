@@ -154,16 +154,22 @@ Você pode passar todas as configurações diretamente no código Python, sem pr
 ```python
 from fortscript import FortScript, RamConfig
 
+projects = [
+    {"name": "Meu Bot", "path": "./bot/main.py"},
+    {"name": "API Node", "path": "./api/package.json"},
+]
+
+heavy_processes = [
+    {"name": "GTA V", "process": "gta5"},
+    {"name": "OBS Studio", "process": "obs64"},
+]
+
+ram_config = RamConfig(threshold=90, safe=80)
+
 app = FortScript(
-    projects=[
-        {"name": "Meu Bot", "path": "./bot/main.py"},
-        {"name": "API Node", "path": "./api/package.json"},
-    ],
-    heavy_process=[
-        {"name": "GTA V", "process": "gta5"},
-        {"name": "OBS Studio", "process": "obs64"},
-    ],
-    ram_config=RamConfig(threshold=90, safe=80),
+    projects=projects,
+    heavy_process=heavy_processes,
+    ram_config=ram_config,
     log_level="INFO",
 )
 
@@ -213,12 +219,14 @@ def quando_retomar():
     print("💻 Voltando ao trabalho! Scripts retomados.")
     # Você pode: reconectar serviços, logar retorno, etc.
 
+callbacks = Callbacks(
+    on_pause=quando_pausar,
+    on_resume=quando_retomar,
+)
+
 app = FortScript(
     config_path="fortscript.yaml",
-    callbacks=Callbacks(
-        on_pause=quando_pausar,    # Função executada ao pausar
-        on_resume=quando_retomar,  # Função executada ao retomar
-    )
+    callbacks=callbacks,
 )
 
 app.run()
@@ -302,7 +310,7 @@ meu_projeto/
 
 ```python
 import os
-from fortscript import FortScript, GAMES
+from fortscript import FortScript, GAMES, RamConfig, Callbacks
 
 # Caminhos dos projetos (usando os.path para compatibilidade)
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -310,14 +318,14 @@ bot_path = os.path.join(base_dir, "bot_discord", "main.py")
 api_path = os.path.join(base_dir, "api_local", "package.json")
 
 # Lista de projetos para gerenciar
-meus_projetos = [
+projects = [
     {"name": "Bot Discord", "path": bot_path},
     {"name": "API Local", "path": api_path},
 ]
 
 # Combinando a lista de jogos padrão com processos personalizados
 # GAMES já inclui GTA, Valorant, CS2, LOL, Fortnite, etc.
-meus_processos_pesados = GAMES + [
+heavy_processes = GAMES + [
     {"name": "Editor De Vídeo", "process": "premiere"},
     {"name": "Compilador C++", "process": "cl"}
 ]
@@ -333,15 +341,20 @@ def ao_retomar():
     print("💻 MODO TRABALHO - Retomando seus scripts...")
     print("=" * 50)
 
+# Configurações
+ram_config = RamConfig(threshold=85, safe=75)
+
+callbacks = Callbacks(
+    on_pause=ao_pausar,
+    on_resume=ao_retomar,
+)
+
 # Inicializa o FortScript
 app = FortScript(
-    projects=meus_projetos,
-    heavy_process=meus_processos_pesados,
-    ram_config=RamConfig(threshold=85, safe=75),
-    callbacks=Callbacks(
-        on_pause=ao_pausar,
-        on_resume=ao_retomar,
-    ),
+    projects=projects,
+    heavy_process=heavy_processes,
+    ram_config=ram_config,
+    callbacks=callbacks,
 )
 
 if __name__ == "__main__":

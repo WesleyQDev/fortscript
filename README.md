@@ -140,16 +140,22 @@ You can pass all configurations directly in Python code without needing a YAML f
 ```python
 from fortscript import FortScript, RamConfig
 
+projects = [
+    {"name": "My Bot", "path": "./bot/main.py"},
+    {"name": "Node API", "path": "./api/package.json"},
+]
+
+heavy_processes = [
+    {"name": "GTA V", "process": "gta5"},
+    {"name": "OBS Studio", "process": "obs64"},
+]
+
+ram_config = RamConfig(threshold=90, safe=80)
+
 app = FortScript(
-    projects=[
-        {"name": "My Bot", "path": "./bot/main.py"},
-        {"name": "Node API", "path": "./api/package.json"},
-    ],
-    heavy_process=[
-        {"name": "GTA V", "process": "gta5"},
-        {"name": "OBS Studio", "process": "obs64"},
-    ],
-    ram_config=RamConfig(threshold=90, safe=80),
+    projects=projects,
+    heavy_process=heavy_processes,
+    ram_config=ram_config,
     log_level="INFO",
 )
 
@@ -195,12 +201,14 @@ def when_paused():
 def when_resumed():
     print("💻 Back to work! Scripts resumed.")
 
+callbacks = Callbacks(
+    on_pause=when_paused,
+    on_resume=when_resumed,
+)
+
 app = FortScript(
     config_path="fortscript.yaml",
-    callbacks=Callbacks(
-        on_pause=when_paused,
-        on_resume=when_resumed,
-    )
+    callbacks=callbacks,
 )
 
 app.run()
@@ -284,7 +292,7 @@ my_project/
 
 ```python
 import os
-from fortscript import FortScript, GAMES
+from fortscript import FortScript, GAMES, RamConfig, Callbacks
 
 # Project paths
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -292,14 +300,14 @@ bot_path = os.path.join(base_dir, "discord_bot", "main.py")
 api_path = os.path.join(base_dir, "local_api", "package.json")
 
 # Projects to manage
-my_projects = [
+projects = [
     {"name": "Discord Bot", "path": bot_path},
     {"name": "Local API", "path": api_path},
 ]
 
 # Combining the default game list with custom processes
 # GAMES already includes GTA, Valorant, CS2, LOL, Fortnite, etc.
-my_heavy_processes = GAMES + [
+heavy_processes = GAMES + [
     {"name": "Video Editor", "process": "premiere"},
     {"name": "C++ Compiler", "process": "cl"}
 ]
@@ -314,15 +322,20 @@ def on_resume():
     print("💻 WORK MODE - Resuming your scripts...")
     print("=" * 50)
 
+# Configuration
+ram_config = RamConfig(threshold=85, safe=75)
+
+callbacks = Callbacks(
+    on_pause=on_pause,
+    on_resume=on_resume,
+)
+
 # Initialize FortScript
 app = FortScript(
-    projects=my_projects,
-    heavy_process=my_heavy_processes,
-    ram_config=RamConfig(threshold=85, safe=75),
-    callbacks=Callbacks(
-        on_pause=on_pause,
-        on_resume=on_resume,
-    ),
+    projects=projects,
+    heavy_process=heavy_processes,
+    ram_config=ram_config,
+    callbacks=callbacks,
 )
 
 if __name__ == "__main__":

@@ -12,13 +12,13 @@ backend_path = os.path.join(base_dir, 'backend_simulator.py')
 
 # Configuration for a typical developer development stack
 # These projects will be started automatically when system resources are stable
-development_projects = [
+projects = [
     {'name': 'API Gateway Simulator', 'path': backend_path}
 ]
 
 # Define heavy applications that should pause our dev stack
 # (e.g., when you want to play a game or render a video)
-productivity_blockers = [
+heavy_processes = [
     {'name': 'Chrome (Heavy Usage)', 'process': 'chrome.exe'},
     {'name': 'High-End Game', 'process': 'cyberpunk2077.exe'},
     {'name': 'Video Editor', 'process': 'premiere.exe'},
@@ -33,20 +33,24 @@ def on_resume():
     print('>>> [Event] System stable. Returning to development mode...')
 
 
-ram = RamConfig(
+# RAM configuration with hysteresis to prevent constant toggling
+ram_config = RamConfig(
     threshold=90,  # Pause if RAM usage exceeds 90%
-    safe=80,  # Resume only when RAM falls below 80% (Hysteresis)
+    safe=80,  # Resume only when RAM falls below 80%
 )
 
-# Initialize FortScript with our custom configuration and events
+# Callback functions for system events
+callbacks = Callbacks(
+    on_pause=on_pause,
+    on_resume=on_resume,
+)
+
+# Initialize FortScript with our custom configuration
 app = FortScript(
-    projects=development_projects,
-    heavy_process=productivity_blockers,
-    ram_config=ram,
-    callbacks=Callbacks(
-        on_pause=on_pause,
-        on_resume=on_resume,
-    ),
+    projects=projects,
+    heavy_process=heavy_processes,
+    ram_config=ram_config,
+    callbacks=callbacks,
     log_level='DEBUG',  # Show detailed logs for debugging
 )
 

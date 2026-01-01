@@ -385,8 +385,8 @@ if __name__ == "__main__":
 
 - [ ] **Funções Customizadas**: Gerenciar funções Python criando threads separadas.
 - [ ] **Condições por Projeto**: Permitir que um projeto específico só pause se um aplicativo específico abrir.
-- [ ] **Encerramento Amigável**: Tentar um encerramento gracioso (SIGINT/CTRL+C) antes de forçar o término do processo.
-- [ ] **Tratamento de Processos Mortos**: Verificar periodicamente se os processos iniciados ainda estão vivos.
+- [x] **Encerramento Amigável**: Tentar um encerramento gracioso (SIGINT/CTRL+C) antes de forçar o término do processo.
+- [x] **Tratamento de Processos Mortos**: Verificar periodicamente se os processos iniciados ainda estão vivos.
 - [ ] **Abstração de Projetos**: Refatorar para classes (`PythonProject`, `NodeProject`) facilitando a adição de novas linguagens.
 - [ ] Arrumar bugs relacionado a path, atualmente se adicionar um script python e ele não estiver na raiz do projeto o venv não sera executado, fortscript tenta executar com python padrão, mas da erro por não possuir os imports e a janela do terminal se encerra
 
@@ -413,7 +413,8 @@ if __name__ == "__main__":
 - [x] Configuração via argumentos no código
 - [x] Callbacks de eventos (`on_pause` e `on_resume`)
 - [x] Níveis de log configuráveis (DEBUG, INFO, WARNING, ERROR)
-- [x] Encerramento seguro de processos (tree-kill)
+- [x] Encerramento seguro de processos (Graceful Shutdown + Kill)
+- [x] Monitoramento de saúde dos processos (Reinício automático em caso de falha)
 - [x] Adicionar opção de ativar ou desativar as janelas que aparecem dos scripts (Apenas em OS Windows)
 - [x] Type Hinting: Melhorar a tipagem em todos os métodos para melhor suporte em IDEs.
 

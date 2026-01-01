@@ -352,8 +352,8 @@ if __name__ == "__main__":
 
 - [ ] **Custom Functions**: Manage Python functions by creating separate threads.
 - [ ] **Per-Project Conditions**: Allow a specific project to pause only if a specific app opens.
-- [ ] **Graceful Shutdown**: Try a graceful shutdown (SIGINT/CTRL+C) before forcing process termination.
-- [ ] **Dead Process Handling**: Periodically check if started processes are still alive.
+- [x] **Graceful Shutdown**: Try a graceful shutdown (SIGINT/CTRL+C) before forcing process termination.
+- [x] **Dead Process Handling**: Periodically check if started processes are still alive.
 - [ ] **Project Abstraction**: Refactor into classes (`PythonProject`, `NodeProject`) to easily add new languages.
 - [x] **Type Hinting**: Improve typing across all methods for better IDE support.
 
@@ -380,7 +380,10 @@ if __name__ == "__main__":
 - [x] Configuration via code arguments
 - [x] Event callbacks (`on_pause` and `on_resume`)
 - [x] Configurable log levels (DEBUG, INFO, WARNING, ERROR)
-- [x] Safe process termination (tree-kill)
+- [x] Safe process termination (Graceful Shutdown + Kill)
+- [x] Process health monitoring (Automatic restart/idle on exit)
+- [x] Option to enable/disable script windows (Windows OS only)
+- [x] Type Hinting: Improved typing across all methods for better IDE support.
 
 ---
 

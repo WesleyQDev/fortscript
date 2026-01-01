@@ -254,19 +254,38 @@ class FortScript:
     def stop_scripts(self) -> None:
         """Terminates active scripts and their child processes."""
         logger.info('Closing active scripts and their child processes...')
+
+        procs_to_kill = []
+
+        # 1. Collect all processes (parents and children)
         for proc in self.active_processes:
             try:
-                # 1. Get the process by PID using psutil
                 parent_process = psutil.Process(proc.pid)
+                procs_to_kill.append(parent_process)
+                procs_to_kill.extend(parent_process.children(recursive=True))
+            except psutil.NoSuchProcess:
+                pass
 
-                # 2. List all children (the python script, etc.)
-                for child_process in parent_process.children(recursive=True):
-                    child_process.terminate()  # Close the child
+        # 2. Send terminate signal (SIGTERM / CTRL_C_EVENT equivalent attempt)
+        for p in procs_to_kill:
+            try:
+                p.terminate()
+            except psutil.NoSuchProcess:
+                pass
 
-                # 3. Close the parent (the uv/pnpm command)
-                parent_process.terminate()
+        # 3. Wait for processes to exit (Graceful period)
+        # We give them 3 seconds to close connections, save state, etc.
+        gone, alive = psutil.wait_procs(procs_to_kill, timeout=3)
 
-            except (psutil.NoSuchProcess, Exception):
+        # 4. Force kill if they are still alive
+        for p in alive:
+            try:
+                logger.warning(
+                    f'Process {p.name()} (PID: {p.pid}) did not exit. '
+                    'Forcing kill.'
+                )
+                p.kill()
+            except psutil.NoSuchProcess:
                 pass
 
         self.active_processes = []
@@ -285,60 +304,90 @@ class FortScript:
 
         while True:
             status_dict = self.apps_monitoring.active_process_list()
-            is_heavy_process_open = any(status_dict.values())
+            is_heavy_open = any(status_dict.values())
 
             current_ram = self.ram_monitoring.get_percent()
             is_ram_critical = current_ram > self.ram_config.safe
 
-            # Initial feedback if system is already heavy
-            if first_check and (is_heavy_process_open or is_ram_critical):
-                reason = (
-                    'heavy processes' if is_heavy_process_open else 'high RAM'
-                )
+            # Initial feedback
+            if first_check and (is_heavy_open or is_ram_critical):
+                reason = 'heavy processes' if is_heavy_open else 'high RAM'
                 logger.info(
                     f'System is busy ({reason}). Waiting for stabilization...'
                 )
                 first_check = False
 
-            if (is_heavy_process_open or is_ram_critical) and script_running:
-                if is_heavy_process_open:
-                    detected = [k for k, v in status_dict.items() if v]
-                    logger.warning(
-                        f'Closing scripts due to heavy processes: {detected}'
-                    )
-                else:
-                    logger.warning(
-                        'Closing scripts due to high RAM usage:'
-                        f'{current_ram}%'
-                    )
-
-                self.stop_scripts()
-                logger.info('Scripts stopped.')
+            # Stop Condition
+            if (is_heavy_open or is_ram_critical) and script_running:
+                self._handle_stop_condition(
+                    is_heavy_open, status_dict, current_ram
+                )
                 script_running = False
+
+            # Start Condition
             elif (
-                not is_heavy_process_open
+                not is_heavy_open
                 and not is_ram_critical
                 and not script_running
                 and current_ram < self.ram_config.safe
             ):
-                logger.info(
-                    f'System stable (RAM: {current_ram}%). Starting scripts...'
-                )
-                self.start_scripts()
+                self._handle_start_condition(current_ram)
                 script_running = True
                 first_check = False
-            elif not is_heavy_process_open:
-                # Optional: showing status even when already running,
-                # or just pass
-                pass
 
-            if not self.active_processes and script_running:
-                logger.error(
-                    'No valid scripts found to start. '
-                    'FortScript is shutting down.'
-                )
-                break
+            # Dead Process Handling
+            if script_running and self.active_processes:
+                script_running = self._check_dead_processes(script_running)
+
             time.sleep(5)
+
+    def _handle_stop_condition(
+        self,
+        is_heavy_open: bool,
+        status_dict: dict[str, bool],
+        current_ram: float,
+    ) -> None:
+        if is_heavy_open:
+            detected = [k for k, v in status_dict.items() if v]
+            logger.warning(
+                f'Closing scripts due to heavy processes: {detected}'
+            )
+        else:
+            logger.warning(
+                f'Closing scripts due to high RAM usage: {current_ram}%'
+            )
+
+        self.stop_scripts()
+        logger.info('Scripts stopped.')
+
+    def _handle_start_condition(self, current_ram: float) -> None:
+        logger.info(
+            f'System stable (RAM: {current_ram}%). Starting scripts...'
+        )
+        self.start_scripts()
+
+    def _check_dead_processes(self, script_running: bool) -> bool:
+        alive_processes = []
+        for proc in self.active_processes:
+            ret_code = proc.poll()
+            if ret_code is None:
+                alive_processes.append(proc)
+            elif ret_code == 0:
+                logger.info(
+                    f'Process (PID: {proc.pid}) finished successfully.'
+                )
+            else:
+                logger.warning(
+                    f'Process (PID: {proc.pid}) crashed/exited '
+                    f'with code {ret_code}.'
+                )
+
+        self.active_processes = alive_processes
+
+        if not self.active_processes:
+            logger.info('All scripts finished. Waiting for system changes...')
+            return False
+        return script_running
 
     def run(self) -> None:
         """Runs the main application loop."""

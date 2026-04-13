@@ -4,7 +4,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from typing import Any, Callable, TypedDict
+from typing import Any, Callable, Mapping, Sequence, TypedDict, cast
 
 import psutil
 import yaml
@@ -81,21 +81,28 @@ class Callbacks:
     on_resume: Callable | None = None
 
 
+@dataclass
+class Functions:
+    ...
+
+
 class FortScript:
     """Main class to manage scripts and monitor application status."""
 
     def __init__(
         self,
         config_path: str = 'fortscript.yaml',
-        projects: list[ProjectConfig] | None = None,
-        heavy_process: list[HeavyProcessConfig] | None = None,
+        projects: Sequence[Mapping[str, Any]] | None = None,
+        functions: Functions | None = None,
+        heavy_process: Sequence[Mapping[str, Any]] | None = None,
         ram_config: RamConfig | None = None,
         callbacks: Callbacks | None = None,
         log_level: str | int | None = None,
         new_console: bool = True,
     ):
         """
-        Initializes FortScript with the configuration file and monitoring parameters.
+        Initializes FortScript with the configuration file and monitoring
+        parameters.
 
         Args:
             config_path (str): The path to the YAML configuration file.
@@ -106,22 +113,25 @@ class FortScript:
             ram_config (RamConfig, optional): RAM usage configuration.
             callbacks (Callbacks, optional): Callback functions for events.
             log_level (str | int, optional): Severity level for logging.
-            new_console (bool): If True, launches scripts in a separate console.
+            new_console (bool): If True, launches scripts in a separate
+                console.
         """
         self.new_console = new_console
         self.file_config = self.load_config(config_path)
 
         self.active_processes: list[subprocess.Popen] = []
 
-        self.projects: list[ProjectConfig] = (
+        self.projects: list[ProjectConfig] = cast(
+            list[ProjectConfig],
             projects
             if projects is not None
-            else self.file_config.get('projects', [])
+            else self.file_config.get('projects', []),
         )
-        self.heavy_processes: list[HeavyProcessConfig] = (
+        self.heavy_processes: list[HeavyProcessConfig] = cast(
+            list[HeavyProcessConfig],
             heavy_process
             if heavy_process is not None
-            else (self.file_config.get('heavy_processes') or [])
+            else (self.file_config.get('heavy_processes') or []),
         )
         if ram_config is None:
             self.ram_config = RamConfig(
@@ -147,7 +157,7 @@ class FortScript:
         self.ram_monitoring = RamMonitoring()
 
     def load_config(self, path: str) -> dict[str, Any]:
-        """Loads the configuration from a YAML file. Returns empty dict if file fails."""
+        """Loads the configuration from a YAML file."""
         try:
             if os.path.exists(path):
                 with open(path, 'r') as file:

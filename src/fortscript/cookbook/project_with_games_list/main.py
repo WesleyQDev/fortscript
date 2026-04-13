@@ -1,7 +1,8 @@
-from fortscript import GAMES, Callbacks, FortScript, RamConfig
 import logging
 import os
 import sys
+
+from fortscript import GAMES, Callbacks, FortScript, RamConfig
 
 # Ensure we can import fortscript from source
 current_dir = os.path.dirname(os.path.abspath(__file__))

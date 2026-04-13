@@ -2,7 +2,9 @@
 Pre-defined list of popular games and heavy applications with their process names.
 """
 
-GAMES = [
+from .main import HeavyProcessConfig
+
+GAMES: list[HeavyProcessConfig] = [
     # Battle Royale / Shooter
     {'name': 'Fortnite', 'process': 'fortnite'},
     {'name': 'Fortnite', 'process': 'fortniteclient-win64-shipping'},
